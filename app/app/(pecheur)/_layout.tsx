@@ -13,9 +13,11 @@ export default function OngletsPecheur() {
   return (
     <Tabs screenOptions={{
       headerShown: false, tabBarActiveTintColor: c.marine, tabBarInactiveTintColor: c.gris,
-      tabBarLabelStyle: { fontFamily: f.gras, fontSize: 12 },
+      tabBarLabelStyle: { fontFamily: f.gras, fontSize: 12, lineHeight: 16 },
       tabBarBadgeStyle: { backgroundColor: c.accent, color: c.surAccent, fontFamily: f.tresGras, fontSize: 11 },
       sceneStyle: { backgroundColor: c.fond },
+      tabBarStyle: { height: 74, paddingTop: 6, paddingBottom: 14 },
+      tabBarItemStyle: { paddingBottom: 2 },
     }}>
       <Tabs.Screen name="arrivage" options={{ title: 'Arrivage', tabBarIcon: ({ color }) => <IcArrivage couleur={color} /> }} />
       <Tabs.Screen name="reservations" options={{ title: 'Réservations', tabBarBadge: aPreparer || undefined, tabBarIcon: ({ color }) => <IcBons couleur={color} /> }} />

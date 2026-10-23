@@ -42,7 +42,7 @@ export default function Accueil() {
           <TextInput value={q} onChangeText={setQ} placeholder="Thon, vivaneau, un port…" placeholderTextColor={c.grisClair} style={st.champ} accessibilityLabel="Rechercher" />
         </View>
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingVertical: 12 }} style={{ flexGrow: 0 }}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingVertical: 12 }} style={{ flexGrow: 0, flexShrink: 0, minHeight: 62 }}>
         {FILTRES.map((x) => <Chip key={x} titre={x} actif={filtre === x} onPress={() => setFiltre(x)} />)}
       </ScrollView>
       <ScrollView contentContainerStyle={{ paddingBottom: 24, gap: 20 }}>

@@ -13,9 +13,11 @@ export default function OngletsClient() {
       headerShown: false,
       tabBarActiveTintColor: c.marine,
       tabBarInactiveTintColor: c.gris,
-      tabBarLabelStyle: { fontFamily: f.gras, fontSize: 12 },
+      tabBarLabelStyle: { fontFamily: f.gras, fontSize: 12, lineHeight: 16 },
       tabBarBadgeStyle: { backgroundColor: c.accent, color: c.surAccent, fontFamily: f.tresGras, fontSize: 11 },
       sceneStyle: { backgroundColor: c.fond },
+      tabBarStyle: { height: 74, paddingTop: 6, paddingBottom: 14 },
+      tabBarItemStyle: { paddingBottom: 2 },
     }}>
       <Tabs.Screen name="index" options={{ title: 'Accueil', tabBarIcon: ({ color }) => <IcAccueil couleur={color} /> }} />
       <Tabs.Screen name="carte" options={{ title: 'Carte', tabBarIcon: ({ color }) => <IcCarte couleur={color} /> }} />
