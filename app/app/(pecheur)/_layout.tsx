@@ -1,5 +1,5 @@
 import { Redirect, Tabs } from 'expo-router';
-import { IcArrivage, IcBons, IcMessages } from '../../src/components/icones';
+import { IcArrivage, IcBons, IcCompte, IcMessages } from '../../src/components/icones';
 import { useApp } from '../../src/store';
 import { couleurs as c, polices as f } from '../../src/theme';
 
@@ -10,6 +10,7 @@ export default function OngletsPecheur() {
   if (s.statutPecheur !== 'verifie' || !s.stripePret) return <Redirect href="/inscription-pecheur" />;
   const aPreparer = app.bonsPecheur(s.etalId).filter((b) => b.statut === 'reserve').length;
   const nonLus = app.nonLusPecheur(s.etalId);
+  const besoins = app.demandesOuvertes().length;
   return (
     <Tabs screenOptions={{
       headerShown: false, tabBarActiveTintColor: c.marine, tabBarInactiveTintColor: c.gris,
@@ -21,6 +22,7 @@ export default function OngletsPecheur() {
     }}>
       <Tabs.Screen name="arrivage" options={{ title: 'Arrivage', tabBarIcon: ({ color }) => <IcArrivage couleur={color} /> }} />
       <Tabs.Screen name="reservations" options={{ title: 'Réservations', tabBarBadge: aPreparer || undefined, tabBarIcon: ({ color }) => <IcBons couleur={color} /> }} />
+      <Tabs.Screen name="besoins" options={{ title: 'Besoins pros', tabBarBadge: besoins || undefined, tabBarIcon: ({ color }) => <IcCompte couleur={color} /> }} />
       <Tabs.Screen name="messages" options={{ title: 'Messages', tabBarBadge: nonLus || undefined, tabBarIcon: ({ color }) => <IcMessages couleur={color} /> }} />
     </Tabs>
   );

@@ -1,5 +1,5 @@
 import { Redirect, Tabs } from 'expo-router';
-import { IcAccueil, IcBons, IcCarte, IcMessages } from '../../src/components/icones';
+import { IcAccueil, IcArrivage, IcBons, IcCarte, IcMessages } from '../../src/components/icones';
 import { useApp } from '../../src/store';
 import { couleurs as c, polices as f } from '../../src/theme';
 
@@ -21,6 +21,7 @@ export default function OngletsClient() {
     }}>
       <Tabs.Screen name="index" options={{ title: 'Accueil', tabBarIcon: ({ color }) => <IcAccueil couleur={color} /> }} />
       <Tabs.Screen name="carte" options={{ title: 'Carte', tabBarIcon: ({ color }) => <IcCarte couleur={color} /> }} />
+      <Tabs.Screen name="besoins" options={{ title: 'Besoins', href: app.e.session.pro ? undefined : null, tabBarIcon: ({ color }) => <IcArrivage couleur={color} /> }} />
       <Tabs.Screen name="bons" options={{ title: 'Mes bons', tabBarBadge: enCours || undefined, tabBarIcon: ({ color }) => <IcBons couleur={color} /> }} />
       <Tabs.Screen name="messages" options={{ title: 'Messages', tabBarBadge: nonLus || undefined, tabBarIcon: ({ color }) => <IcMessages couleur={color} /> }} />
     </Tabs>

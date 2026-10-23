@@ -17,9 +17,10 @@ export default function EtalEcran() {
 
   const autre = app.e.panier && app.e.panier.etalId !== e.id;
   const nb = app.e.panier?.etalId === e.id ? app.e.panier.lignes.length : 0;
+  const pro = !!app.e.session?.pro;
   const pas = (produitId: string, signe: 1 | -1) => {
     const q = app.kgPanier(e.id, produitId);
-    app.reglerKg(e.id, produitId, q === 0 && signe > 0 ? 1 : q + 0.5 * signe);
+    app.reglerKg(e.id, produitId, q === 0 && signe > 0 ? 1 : q + (pro ? 1 : 0.5) * signe);
   };
   const prodReglage = reglage ? e.produits.find((p) => p.id === reglage.produitId) : undefined;
 
@@ -97,7 +98,7 @@ export default function EtalEcran() {
               <Pressable onPress={() => setReglage({ ...reglage, kg: Math.min(prodReglage.dispoKg, Math.round((reglage.kg + 0.1) * 10) / 10) })} style={{ width: 76, height: 56, borderRadius: 16, backgroundColor: c.doux, alignItems: 'center', justifyContent: 'center' }}><T tresGras>+100 g</T></Pressable>
             </View>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
-              {[0.5, 1, 1.5, 2, 3, 5].filter((x) => x <= prodReglage.dispoKg).map((x) => <Chip key={x} titre={x < 1 ? '500 g' : kg(x)} actif={Math.abs(reglage.kg - x) < 0.01} onPress={() => setReglage({ ...reglage, kg: x })} />)}
+              {(pro ? [1, 2, 5, 10, 20] : [0.5, 1, 1.5, 2, 3, 5]).filter((x) => x <= prodReglage.dispoKg).map((x) => <Chip key={x} titre={x < 1 ? '500 g' : kg(x)} actif={Math.abs(reglage.kg - x) < 0.01} onPress={() => setReglage({ ...reglage, kg: x })} />)}
             </View>
             <Bouton titre={reglage.kg > 0 ? 'Valider ' + kg(reglage.kg) : 'Retirer du panier'} onPress={() => { app.reglerKg(e.id, reglage.produitId, reglage.kg); setReglage(null); }} />
           </View>

@@ -20,9 +20,10 @@ export default function Reservations() {
         {bons.map((b) => (
           <Pressable key={b.code} onPress={() => router.push({ pathname: '/pesee/[code]', params: { code: b.code } })} style={{ padding: 16, gap: 6, borderBottomWidth: 1, borderBottomColor: c.ligne }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <T tresGras style={{ fontSize: 18 }}>{b.code} · {b.client === 'Vous' ? 'Client démo' : b.client}</T>
+              <T tresGras style={{ fontSize: 18 }}>{b.code} · {b.pro ? b.pro.raison : b.client === 'Vous' ? 'Client démo' : b.client}</T>
               <Pastille texte={b.creneau} />
             </View>
+            {b.pro ? <View style={{ flexDirection: 'row', gap: 6 }}><Pastille texte={'Pro · ' + b.pro.type} fonce />{b.livraison ? <Pastille texte="Livraison par chauffeur" style={{ backgroundColor: c.doux }} /> : null}</View> : null}
             <T gris petit>{b.lignes.map((l) => l.espece + ' ' + kg(l.kg) + ' (' + l.preparation.toLowerCase() + ')').join(', ')}</T>
             <Pastille texte={b.statut === 'retire' ? 'Retiré · encaissé ' + euro(b.montantPaye ?? 0) : 'À préparer'} style={{ backgroundColor: b.statut === 'retire' ? '#dff3ea' : c.doux }} />
           </Pressable>

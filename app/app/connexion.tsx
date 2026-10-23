@@ -10,7 +10,7 @@ import type { Role } from '../src/types';
 // Connexion par numéro de téléphone + code reçu par SMS (Supabase Auth en production)
 export default function Connexion() {
   const app = useApp();
-  const [role, setRole] = useState<Role>('client');
+  const [role, setRole] = useState<Role | 'pro'>('client');
   const [tel, setTel] = useState('');
   const [prenom, setPrenom] = useState('');
   const [etape, setEtape] = useState<'numero' | 'code'>('numero');
@@ -23,6 +23,7 @@ export default function Connexion() {
   const valider = () => {
     if (code !== CODE_SMS_DEMO) { setErreur('Code incorrect. Vérifiez le SMS reçu' + (MODE_DEMO ? ' (démo : ' + CODE_SMS_DEMO + ').' : '.')); return; }
     if (role === 'pecheur') { router.replace({ pathname: '/inscription-pecheur', params: { tel: chiffres } }); return; }
+    if (role === 'pro') { router.replace({ pathname: '/inscription-pro', params: { tel: chiffres } }); return; }
     app.connecter(chiffres, 'client', prenom.trim() || 'Client');
     router.replace('/(client)');
   };
@@ -44,13 +45,14 @@ export default function Connexion() {
               <T gris>Le poisson du jour des pêcheurs de Martinique, réservé en quelques secondes.</T>
             </View>
             <View style={st.bascule} accessibilityRole="radiogroup">
-              {(['client', 'pecheur'] as Role[]).map((r) => (
+              {([['client', 'Particulier'], ['pro', 'Professionnel'], ['pecheur', 'Pêcheur']] as const).map(([r, libelle]) => (
                 <Pressable key={r} accessibilityRole="radio" accessibilityState={{ checked: role === r }} onPress={() => setRole(r)} style={[st.choix, role === r && { backgroundColor: c.marine }]}>
-                  <T tresGras style={{ color: role === r ? c.surMarine : c.texte }}>{r === 'client' ? 'J’achète du poisson' : 'Je suis pêcheur'}</T>
+                  <T tresGras style={{ color: role === r ? c.surMarine : c.texte, fontSize: 14 }}>{libelle}</T>
                 </Pressable>
               ))}
             </View>
-            {role === 'client' ? (
+            {role === 'pro' ? <T gris petit style={{ marginTop: -12 }}>Restaurant, poissonnerie, revendeur, traiteur : achats en volume et factures pour votre comptabilité.</T> : null}
+            {role !== 'pecheur' ? (
               <View style={{ gap: 6 }}>
                 <T gras>Votre prénom</T>
                 <TextInput value={prenom} onChangeText={setPrenom} placeholder="Ex. Sophie" style={st.champ} autoComplete="given-name" />

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bouton, Chip, EnTete, Feuille, Ligne, T, Vide } from '../src/components/ui';
-import { euro, FRAIS_SERVICE, kg, montantBloque, sousTotal } from '../src/format';
+import { euro, FRAIS_LIVRAISON, FRAIS_SERVICE, kg, LIVRAISON_MIN_KG, montantBloque, sousTotal } from '../src/format';
 import { MODE_DEMO, useApp } from '../src/store';
 import { couleurs as c } from '../src/theme';
 
@@ -21,7 +21,11 @@ export default function PanierEcran() {
   const e = app.etal(p.etalId)!;
   const cren = app.creneaux(e);
   const creneau = app.e.creneau && cren.includes(app.e.creneau) ? app.e.creneau : cren[Math.min(1, cren.length - 1)];
-  const st = sousTotal(p.lignes), bloque = montantBloque(st);
+  const pro = app.e.session?.pro;
+  const totalKg = p.lignes.reduce((t, l) => t + l.kg, 0);
+  const livraisonPossible = !!pro && totalKg >= LIVRAISON_MIN_KG;
+  const livrer = livraisonPossible && app.e.livraison;
+  const st = sousTotal(p.lignes), bloque = montantBloque(st) + (livrer ? FRAIS_LIVRAISON : 0);
 
   const reserver = () => {
     setEnvoi(true);
@@ -55,7 +59,18 @@ export default function PanierEcran() {
         })}
         <View style={{ padding: 16, gap: 12 }}>
           <Pressable onPress={() => router.back()}><T tresGras>+ Ajouter d’autres poissons</T></Pressable>
-          <T tresGras style={{ fontSize: 16 }}>Retrait · {e.port}</T>
+          {pro ? (
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              {[['Je viens chercher', 'Au port · ' + e.port, false], ['Livraison', livraisonPossible ? 'Par chauffeur · ' + euro(FRAIS_LIVRAISON) : 'Dès ' + LIVRAISON_MIN_KG + ' kg', true]].map(([t, d, v]) => (
+                <Pressable key={String(t)} disabled={v === true && !livraisonPossible} onPress={() => app.choisirLivraison(v as boolean)}
+                  style={{ flex: 1, borderRadius: 12, padding: 12, borderWidth: livrer === v ? 2 : 1, borderColor: livrer === v ? c.marine : c.ligne, backgroundColor: livrer === v ? c.doux : '#fff', opacity: v === true && !livraisonPossible ? 0.45 : 1 }}>
+                  <T tresGras>{String(t)}</T><T gris petit>{String(d)}</T>
+                </Pressable>
+              ))}
+            </View>
+          ) : null}
+          {livrer ? <T gris petit>Livré à : {pro!.adresse || pro!.raison + ', ' + pro!.commune}</T> : null}
+          <T tresGras style={{ fontSize: 16 }}>{livrer ? 'Créneau de livraison' : 'Retrait · ' + e.port}</T>
           <View style={{ flexDirection: 'row', gap: 8 }}>
             {cren.map((x) => (
               <Pressable key={x} onPress={() => app.choisirCreneau(x)} style={{ flex: 1, minHeight: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: creneau === x ? 2 : 1, borderColor: creneau === x ? c.marine : c.ligne, backgroundColor: creneau === x ? c.doux : '#fff' }}>
@@ -70,6 +85,7 @@ export default function PanierEcran() {
           <View style={{ gap: 6 }}>
             <Ligne2 a="Sous-total estimé" b={euro(st)} />
             <Ligne2 a="Frais de service" b={euro(FRAIS_SERVICE)} />
+            {livrer ? <Ligne2 a="Livraison par chauffeur" b={euro(FRAIS_LIVRAISON)} /> : null}
             <Ligne style={{ marginVertical: 4 }} />
             <Ligne2 a="Montant bloqué sur la carte" b={euro(bloque)} fort />
             <T gris petit>Vous ne payez que le poids réel, pesé devant vous au retrait. Le reste est libéré aussitôt.</T>

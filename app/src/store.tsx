@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { ETALS_DEMO, PORTS } from './data/demo';
-import { distanceKm, heure, kg, montantBloque, sousTotal } from './format';
-import type { Bon, Conversation, Etal, LignePanier, Message, Panier, Role, Session } from './types';
+import { distanceKm, FRAIS_LIVRAISON, heure, kg, LIVRAISON_MIN_KG, montantBloque, sousTotal } from './format';
+import type { Bon, Conversation, Demande, Etal, InfosPro, LignePanier, Message, Panier, Role, Session } from './types';
 
 // Mode démo : tout est stocké sur le téléphone. En production, chaque action
 // passera par Supabase (voir src/services/backend.ts et supabase/).
@@ -17,10 +17,12 @@ type Etat = {
   etals: Etal[];
   panier: Panier;
   creneau: string | null;
+  livraison: boolean;
   bons: Bon[];
   convs: Record<string, Conversation>;
   prochainCode: number;
   horloge: number;
+  demandes: Demande[];
 };
 
 const etatInitial = (): Etat => ({
@@ -29,6 +31,7 @@ const etatInitial = (): Etat => ({
   etals: JSON.parse(JSON.stringify(ETALS_DEMO)),
   panier: null,
   creneau: null,
+  livraison: false,
   bons: [
     { code: 'R-25', etalId: 'jm', client: 'Sophie L.', lignes: [{ produitId: 'jm1', espece: 'Thon jaune', kg: 1.5, prixKg: 14, preparation: 'En tranches', supplementKg: 2 }], creneau: 'Avant 10 h', statut: 'reserve', montantBloque: 27.3, creeLe: 0 },
     { code: 'R-26', etalId: 'jm', client: 'Marc D.', lignes: [{ produitId: 'jm2', espece: 'Dorade coryphène', kg: 2, prixKg: 13, preparation: 'En filets', supplementKg: 3 }], creneau: '10 h – 12 h', statut: 'reserve', montantBloque: 36.1, creeLe: 0 },
@@ -39,6 +42,10 @@ const etatInitial = (): Etat => ({
   },
   prochainCode: 27,
   horloge: HEURE_DEMO,
+  demandes: [
+    { id: 'd1', auteur: 'Chez Tante Arlette', pro: { raison: 'Restaurant Chez Tante Arlette', type: 'Restaurant', siret: '12345678900012', commune: 'Le Robert' }, espece: 'Thon jaune', kg: 15, prixMaxKg: 13, pour: 'Demain', note: 'Livraison avant 10 h si possible', statut: 'ouverte', creeLe: 7 * 60 },
+    { id: 'd2', auteur: 'Poissonnerie du Bourg', pro: { raison: 'Poissonnerie du Bourg', type: 'Poissonnerie', siret: '98765432100011', commune: 'Le François' }, espece: 'Vivaneau', kg: 10, prixMaxKg: 16, pour: 'Aujourd’hui', statut: 'ouverte', creeLe: 7 * 60 + 30 },
+  ],
 });
 
 function creneauxDe(e: Etal) {
@@ -74,7 +81,7 @@ function useMagasin() {
   ref.current = e;
 
   useEffect(() => {
-    AsyncStorage.getItem(CLE).then((v) => { if (v) { try { setE({ ...etatInitial(), ...JSON.parse(v) }); } catch {} } }).finally(() => setPret(true));
+    AsyncStorage.getItem(CLE).then((v) => { if (v) { try { setE({ ...etatInitial(), ...JSON.parse(v), demandes: JSON.parse(v).demandes ?? etatInitial().demandes }); } catch {} } }).finally(() => setPret(true));
   }, []);
   useEffect(() => { if (pret) AsyncStorage.setItem(CLE, JSON.stringify(e)).catch(() => {}); }, [e, pret]);
 
@@ -88,6 +95,9 @@ function useMagasin() {
         ? { telephone, role, prenom, etalId: 'jm', statutPecheur: 'verifie', stripePret: true }
         : { telephone, role, prenom } }));
     },
+    connecterPro(telephone: string, prenom: string, pro: InfosPro) {
+      maj((x) => ({ ...x, session: { telephone, role: 'client', prenom, pro }, commune: PORTS[pro.commune] ? pro.commune : x.commune }));
+    },
     inscrirePecheur(infos: { prenom: string; port: string; bateau: string; immatriculation: string; telephone: string }) {
       maj((x) => {
         const id = 'moi';
@@ -95,6 +105,27 @@ function useMagasin() {
         x.etals.push({ id, pecheur: infos.prenom, port: infos.port, note: 5, avis: 0, bateau: infos.bateau, debarque: x.horloge, limiteRetrait: 12 * 60,
           lieu: 'Débarcadère de ' + infos.port, precision: 'à préciser par le pêcheur', produits: [] });
         x.session = { telephone: infos.telephone, role: 'pecheur', prenom: infos.prenom, etalId: id, statutPecheur: 'en_attente', stripePret: false };
+        return x;
+      });
+    },
+    // --- Demandes des professionnels (en production : table « demandes » + notification aux pêcheurs du secteur) ---
+    posterDemande(d: { espece: string; kg: number; prixMaxKg: number; pour: Demande['pour']; note?: string; livraison?: Demande['livraison'] }) {
+      maj((x) => { if (!x.session?.pro) return x; x.demandes.unshift({ ...d, id: 'd' + Date.now(), auteur: 'Vous', pro: x.session.pro, statut: 'ouverte', creeLe: x.horloge }); return x; });
+    },
+    annulerDemande(id: string) { maj((x) => { const d = x.demandes.find((y) => y.id === id); if (d && d.statut === 'ouverte') d.statut = 'annulee'; return x; }); },
+    accepterDemande(id: string, etalId: string) {
+      maj((x) => {
+        const d = x.demandes.find((y) => y.id === id); if (!d || d.statut !== 'ouverte') return x;
+        const code = 'R-' + x.prochainCode; x.prochainCode += 1;
+        const lignes = [{ produitId: 'dem-' + id, espece: d.espece, kg: d.kg, prixKg: d.prixMaxKg, preparation: 'Entier', supplementKg: 0 }];
+        const client = d.auteur;
+        x.bons.push({ code, etalId, client, pro: d.pro, livraison: d.livraison, lignes, creneau: d.pour === 'Demain' ? 'Demain matin' : 'Aujourd’hui', statut: 'reserve', montantBloque: montantBloque(sousTotal(lignes)) + (d.livraison?.frais ?? 0), creeLe: x.horloge });
+        d.statut = 'acceptee'; d.etalId = etalId; d.bon = code;
+        const cid = etalId + '|' + client;
+        x.convs[cid] = x.convs[cid] ?? { id: cid, etalId, client, bon: code, messages: [], luClient: false, luPecheur: true };
+        x.convs[cid].bon = code;
+        x.convs[cid].messages.push({ id: 'a' + Date.now(), auteur: 'pecheur', texte: 'Bonjour, je peux vous fournir ' + kg(d.kg) + ' de ' + d.espece.toLowerCase() + ' à ' + d.prixMaxKg.toFixed(2).replace('.', ',') + ' €/kg (' + d.pour.toLowerCase() + ')' + (d.livraison ? ', livré par un chauffeur à votre établissement' : '') + '. Commande ' + code + ' créée.', heure: tic(x) });
+        x.convs[cid].luClient = false;
         return x;
       });
     },
@@ -127,6 +158,7 @@ function useMagasin() {
     },
     viderPanier() { maj((x) => ({ ...x, panier: null })); },
     choisirCreneau(c: string) { maj((x) => ({ ...x, creneau: c })); },
+    choisirLivraison(v: boolean) { maj((x) => ({ ...x, livraison: v })); },
 
     // --- Réservation (en production : fonction serveur « creer-reservation » + Stripe) ---
     reserver(): string | null {
@@ -137,7 +169,10 @@ function useMagasin() {
         const lignes = x.panier!.lignes;
         lignes.forEach((l) => { const p = et.produits.find((q) => q.id === l.produitId)!; p.dispoKg = Math.round((p.dispoKg - l.kg) * 10) / 10; });
         const creneau = x.creneau && creneauxDe(et).includes(x.creneau) ? x.creneau : creneauxDe(et)[Math.min(1, creneauxDe(et).length - 1)];
-        x.bons.push({ code, etalId: et.id, client: 'Vous', lignes, creneau, statut: 'reserve', montantBloque: montantBloque(sousTotal(lignes)), creeLe: x.horloge });
+        const totalKg = lignes.reduce((t, l) => t + l.kg, 0);
+        const livraison = x.session?.pro && x.livraison && totalKg >= LIVRAISON_MIN_KG ? { adresse: x.session.pro.adresse || x.session.pro.raison + ', ' + x.session.pro.commune, frais: FRAIS_LIVRAISON } : undefined;
+        x.bons.push({ code, etalId: et.id, client: 'Vous', pro: x.session?.pro, livraison, lignes, creneau: livraison ? 'Livraison ' + creneau.toLowerCase() : creneau, statut: 'reserve', montantBloque: montantBloque(sousTotal(lignes)) + (livraison?.frais ?? 0), creeLe: x.horloge });
+        x.livraison = false;
         const id = et.id + '|Vous';
         x.convs[id] = x.convs[id] ?? { id, etalId: et.id, client: 'Vous', bon: code, messages: [], luClient: true, luPecheur: false };
         x.convs[id].bon = code;
@@ -211,6 +246,9 @@ function useMagasin() {
     kgPanier: (etalId: string, produitId: string) => (e.panier?.etalId === etalId ? e.panier.lignes.find((l) => l.produitId === produitId)?.kg ?? 0 : 0),
     creneaux: creneauxDe,
     mesBons: () => e.bons.filter((b) => b.client === 'Vous').slice().reverse(),
+    mesDemandes: () => e.demandes.filter((d) => d.auteur === 'Vous'),
+    // un pro ne voit pas ses propres besoins ici ; en démo, le pêcheur voit aussi ceux publiés depuis ce téléphone
+    demandesOuvertes: () => e.demandes.filter((d) => d.statut === 'ouverte' && !(e.session?.pro && d.auteur === 'Vous')),
     bonsPecheur: (etalId?: string) => e.bons.filter((b) => b.etalId === etalId),
     nonLusClient: () => Object.values(e.convs).filter((c) => c.client === 'Vous' && !c.luClient).length,
     nonLusPecheur: (etalId?: string) => Object.values(e.convs).filter((c) => c.etalId === etalId && !c.luPecheur).length,

@@ -20,4 +20,10 @@ export const FRAIS_SERVICE = 0.9;
 export const MARGE_EMPREINTE = 0.1; // on bloque 10 % de plus que l'estimation
 export const sousTotal = (lignes: { kg: number; prixKg: number; supplementKg: number }[]) =>
   lignes.reduce((s, l) => s + l.kg * (l.prixKg + l.supplementKg), 0);
+// Livraison par chauffeur (pros) : montants provisoires, à fixer
+export const LIVRAISON_MIN_KG = 10;
+export const FRAIS_LIVRAISON = 15;
+
+export const TVA_PRODUITS_MER = 0.021; // taux réduit Martinique : à confirmer avec un comptable
+export const detailTva = (ttc: number) => { const ht = Math.round((ttc / (1 + TVA_PRODUITS_MER)) * 100) / 100; return { ht, tva: Math.round((ttc - ht) * 100) / 100, ttc }; };
 export const montantBloque = (st: number) => Math.round((st * (1 + MARGE_EMPREINTE) + FRAIS_SERVICE) * 100) / 100;
