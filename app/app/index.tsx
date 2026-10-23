@@ -1,4 +1,10 @@
-import { Text, View } from 'react-native';
-export default function Accueil() {
-  return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}><Text>Pêche Connect</Text></View>;
+import { Redirect } from 'expo-router';
+import { useApp } from '../src/store';
+
+// Aiguillage : connexion, espace pêcheur ou espace client
+export default function Aiguillage() {
+  const { e } = useApp();
+  if (!e.session) return <Redirect href="/connexion" />;
+  if (e.session.role === 'pecheur') return <Redirect href={e.session.statutPecheur === 'verifie' ? '/(pecheur)/arrivage' : '/inscription-pecheur'} />;
+  return <Redirect href="/(client)" />;
 }

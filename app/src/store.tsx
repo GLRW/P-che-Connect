@@ -1,0 +1,233 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { ETALS_DEMO, PORTS } from './data/demo';
+import { distanceKm, heure, kg, montantBloque, sousTotal } from './format';
+import type { Bon, Conversation, Etal, LignePanier, Message, Panier, Role, Session } from './types';
+
+// Mode démo : tout est stocké sur le téléphone. En production, chaque action
+// passera par Supabase (voir src/services/backend.ts et supabase/).
+export const MODE_DEMO = !process.env.EXPO_PUBLIC_SUPABASE_URL;
+export const CODE_SMS_DEMO = '123456';
+const CLE = 'peche-connect-app-v1';
+const HEURE_DEMO = 8 * 60 + 5; // en démo, l'horloge démarre à 8 h 05
+
+type Etat = {
+  session: Session;
+  commune: string;
+  etals: Etal[];
+  panier: Panier;
+  creneau: string | null;
+  bons: Bon[];
+  convs: Record<string, Conversation>;
+  prochainCode: number;
+  horloge: number;
+};
+
+const etatInitial = (): Etat => ({
+  session: null,
+  commune: 'Le Robert',
+  etals: JSON.parse(JSON.stringify(ETALS_DEMO)),
+  panier: null,
+  creneau: null,
+  bons: [
+    { code: 'R-25', etalId: 'jm', client: 'Sophie L.', lignes: [{ produitId: 'jm1', espece: 'Thon jaune', kg: 1.5, prixKg: 14, preparation: 'En tranches', supplementKg: 2 }], creneau: 'Avant 10 h', statut: 'reserve', montantBloque: 27.3, creeLe: 0 },
+    { code: 'R-26', etalId: 'jm', client: 'Marc D.', lignes: [{ produitId: 'jm2', espece: 'Dorade coryphène', kg: 2, prixKg: 13, preparation: 'En filets', supplementKg: 3 }], creneau: '10 h – 12 h', statut: 'reserve', montantBloque: 36.1, creeLe: 0 },
+  ],
+  convs: {
+    'jm|Sophie L.': { id: 'jm|Sophie L.', etalId: 'jm', client: 'Sophie L.', bon: 'R-25', luClient: true, luPecheur: false,
+      messages: [{ id: 'm0', auteur: 'client', texte: 'Bonjour, je suis sur le parking. Vous êtes où exactement ?', heure: 7 * 60 + 57 }] },
+  },
+  prochainCode: 27,
+  horloge: HEURE_DEMO,
+});
+
+function creneauxDe(e: Etal) {
+  const c = ['Avant 10 h'];
+  if (e.limiteRetrait > 600) c.push('10 h – ' + (e.limiteRetrait >= 720 ? '12 h' : heure(e.limiteRetrait)));
+  if (e.limiteRetrait > 720) c.push('12 h – ' + heure(e.limiteRetrait));
+  return c;
+}
+
+// Réponses automatiques du pêcheur, uniquement pour la démo
+function reponseDemo(texte: string, e: Etal): Omit<Message, 'id' | 'heure'>[] {
+  const t = texte.toLowerCase();
+  if (/o[uù] [eê]tes|vous [eê]tes o[uù]|position|trouver/.test(t)) {
+    const p = PORTS[e.port];
+    return [{ auteur: 'pecheur', texte: 'Je vous envoie ma position.' }, { auteur: 'pecheur', position: { libelle: 'En direct jusqu’à ' + heure(e.limiteRetrait), lat: p.lat, lon: p.lon } }];
+  }
+  if (/retard/.test(t)) return [{ auteur: 'pecheur', texte: 'Pas de souci, je vous attends jusqu’à ' + heure(e.limiteRetrait) + '.' }];
+  if (/arrive/.test(t)) return [{ auteur: 'pecheur', texte: 'Parfait, à tout de suite ! Je suis ' + (e.precision ?? 'au port') + '.' }];
+  if (/merci/.test(t)) return [{ auteur: 'pecheur', texte: 'Avec plaisir, bonne journée !' }];
+  return [{ auteur: 'pecheur', texte: 'Bien reçu, merci !' }];
+}
+
+// Anti-contournement : les numéros de téléphone sont masqués dans la messagerie
+export function masquerNumeros(t: string) {
+  const re = /(\+?\d[\d .-]{7,}\d)/g;
+  return { texte: t.replace(re, '•• •• •• •• ••'), masque: re.test(t) };
+}
+
+function useMagasin() {
+  const [e, setE] = useState<Etat>(etatInitial);
+  const [pret, setPret] = useState(false);
+  const ref = useRef(e);
+  ref.current = e;
+
+  useEffect(() => {
+    AsyncStorage.getItem(CLE).then((v) => { if (v) { try { setE({ ...etatInitial(), ...JSON.parse(v) }); } catch {} } }).finally(() => setPret(true));
+  }, []);
+  useEffect(() => { if (pret) AsyncStorage.setItem(CLE, JSON.stringify(e)).catch(() => {}); }, [e, pret]);
+
+  const maj = (f: (x: Etat) => Etat) => setE((x) => f(JSON.parse(JSON.stringify(x))));
+  const tic = (x: Etat) => (x.horloge += 1);
+
+  const actions = useMemo(() => ({
+    // --- Connexion (en production : Supabase Auth par SMS) ---
+    connecter(telephone: string, role: Role, prenom: string) {
+      maj((x) => ({ ...x, session: role === 'pecheur'
+        ? { telephone, role, prenom, etalId: 'jm', statutPecheur: 'verifie', stripePret: true }
+        : { telephone, role, prenom } }));
+    },
+    inscrirePecheur(infos: { prenom: string; port: string; bateau: string; immatriculation: string; telephone: string }) {
+      maj((x) => {
+        const id = 'moi';
+        x.etals = x.etals.filter((t) => t.id !== id);
+        x.etals.push({ id, pecheur: infos.prenom, port: infos.port, note: 5, avis: 0, bateau: infos.bateau, debarque: x.horloge, limiteRetrait: 12 * 60,
+          lieu: 'Débarcadère de ' + infos.port, precision: 'à préciser par le pêcheur', produits: [] });
+        x.session = { telephone: infos.telephone, role: 'pecheur', prenom: infos.prenom, etalId: id, statutPecheur: 'en_attente', stripePret: false };
+        return x;
+      });
+    },
+    simulerVerification() { maj((x) => { if (x.session) x.session.statutPecheur = 'verifie'; return x; }); },
+    simulerStripe() { maj((x) => { if (x.session) x.session.stripePret = true; return x; }); },
+    deconnecter() { maj((x) => ({ ...x, session: null, panier: null })); },
+    reinitialiser() { const s = etatInitial(); setE(s); },
+    choisirCommune(c: string) { maj((x) => ({ ...x, commune: c })); },
+
+    // --- Panier ---
+    reglerKg(etalId: string, produitId: string, q: number) {
+      maj((x) => {
+        const et = x.etals.find((t) => t.id === etalId)!; const pr = et.produits.find((p) => p.id === produitId)!;
+        q = Math.max(0, Math.min(pr.dispoKg, Math.round(q * 10) / 10));
+        if (!x.panier || x.panier.etalId !== etalId) x.panier = { etalId, lignes: [] };
+        let l = x.panier.lignes.find((y) => y.produitId === produitId);
+        if (!l && q > 0) { l = { produitId, espece: pr.espece, kg: 0, prixKg: pr.prixKg, preparation: pr.preparations[0].nom, supplementKg: pr.preparations[0].supplementKg }; x.panier.lignes.push(l); }
+        if (l) l.kg = q;
+        x.panier.lignes = x.panier.lignes.filter((y) => y.kg > 0);
+        if (!x.panier.lignes.length) x.panier = null;
+        return x;
+      });
+    },
+    choisirPreparation(produitId: string, nom: string) {
+      maj((x) => {
+        const l = x.panier?.lignes.find((y) => y.produitId === produitId); if (!x.panier || !l) return x;
+        const pr = x.etals.find((t) => t.id === x.panier!.etalId)!.produits.find((p) => p.id === produitId)!;
+        const prep = pr.preparations.find((p) => p.nom === nom)!; l.preparation = prep.nom; l.supplementKg = prep.supplementKg; return x;
+      });
+    },
+    viderPanier() { maj((x) => ({ ...x, panier: null })); },
+    choisirCreneau(c: string) { maj((x) => ({ ...x, creneau: c })); },
+
+    // --- Réservation (en production : fonction serveur « creer-reservation » + Stripe) ---
+    reserver(): string | null {
+      const x0 = ref.current; if (!x0.panier || !x0.session) return null;
+      const code = 'R-' + x0.prochainCode;
+      maj((x) => {
+        const et = x.etals.find((t) => t.id === x.panier!.etalId)!;
+        const lignes = x.panier!.lignes;
+        lignes.forEach((l) => { const p = et.produits.find((q) => q.id === l.produitId)!; p.dispoKg = Math.round((p.dispoKg - l.kg) * 10) / 10; });
+        const creneau = x.creneau && creneauxDe(et).includes(x.creneau) ? x.creneau : creneauxDe(et)[Math.min(1, creneauxDe(et).length - 1)];
+        x.bons.push({ code, etalId: et.id, client: 'Vous', lignes, creneau, statut: 'reserve', montantBloque: montantBloque(sousTotal(lignes)), creeLe: x.horloge });
+        const id = et.id + '|Vous';
+        x.convs[id] = x.convs[id] ?? { id, etalId: et.id, client: 'Vous', bon: code, messages: [], luClient: true, luPecheur: false };
+        x.convs[id].bon = code;
+        x.panier = null; x.prochainCode += 1;
+        return x;
+      });
+      setTimeout(() => maj((x) => {
+        const b = x.bons.find((y) => y.code === code); if (!b) return x;
+        const c = x.convs[b.etalId + '|Vous'];
+        c.messages.push({ id: 'b' + code, auteur: 'pecheur', texte: 'Bonjour ! Bien reçu votre réservation ' + code + ', je vous prépare ça (' + b.creneau.toLowerCase() + ').', heure: tic(x) });
+        c.luClient = false; return x;
+      }), 2500);
+      return code;
+    },
+
+    // --- Messagerie ---
+    envoyer(convId: string, texte: string, auteur: Role) {
+      texte = texte.trim(); if (!texte) return;
+      const m = masquerNumeros(texte);
+      maj((x) => {
+        const c = x.convs[convId];
+        c.messages.push({ id: 'm' + Date.now(), auteur, texte: m.texte, heure: tic(x) });
+        if (m.masque) c.messages.push({ id: 's' + Date.now(), auteur: 'systeme', texte: 'Numéro masqué : les échanges restent sur Pêche Connect jusqu’au retrait.', heure: x.horloge });
+        if (auteur === 'client') c.luPecheur = false; else c.luClient = false;
+        return x;
+      });
+      if (auteur === 'client' && MODE_DEMO) {
+        setTimeout(() => maj((x) => {
+          const c = x.convs[convId]; const et = x.etals.find((t) => t.id === c.etalId)!;
+          reponseDemo(texte, et).forEach((r, i) => c.messages.push({ ...r, id: 'r' + Date.now() + i, heure: tic(x) }));
+          c.luClient = false; return x;
+        }), 1300);
+      }
+    },
+    envoyerPosition(convId: string, mode: 'direct' | 'une-fois' | 'habituel') {
+      maj((x) => {
+        const c = x.convs[convId]; const et = x.etals.find((t) => t.id === c.etalId)!; const p = PORTS[et.port];
+        const libelle = mode === 'direct' ? 'En direct jusqu’à ' + heure(et.limiteRetrait) : mode === 'une-fois' ? 'Position envoyée à ' + heure(x.horloge) : 'Point de vente habituel · ' + et.lieu;
+        c.messages.push({ id: 'p' + Date.now(), auteur: 'pecheur', position: { libelle, lat: p.lat, lon: p.lon }, heure: tic(x) });
+        c.luClient = false; return x;
+      });
+    },
+    marquerLu(convId: string, role: Role) {
+      maj((x) => { const c = x.convs[convId]; if (!c) return x; if (role === 'client') c.luClient = true; else c.luPecheur = true; return x; });
+    },
+
+    // --- Espace pêcheur ---
+    publierArrivage(etalId: string, lignes: { espece: string; prixKg: number; dispoKg: number; preparations: { nom: string; supplementKg: number }[] }[]) {
+      maj((x) => {
+        const et = x.etals.find((t) => t.id === etalId)!;
+        et.produits = lignes.filter((l) => l.dispoKg > 0).map((l, i) => ({ id: etalId + '-' + i + '-' + Date.now(), espece: l.espece, prixKg: l.prixKg, dispoKg: l.dispoKg, preparations: l.preparations }));
+        et.debarque = x.horloge; return x;
+      });
+    },
+    validerPesee(code: string, poids: number[]) {
+      maj((x) => {
+        const b = x.bons.find((y) => y.code === code)!;
+        b.lignes.forEach((l, i) => (l.kg = poids[i]));
+        b.montantPaye = Math.round((sousTotal(b.lignes) + 0.9) * 100) / 100;
+        b.statut = 'retire'; return x;
+      });
+    },
+  }), []);
+
+  const sel = useMemo(() => ({
+    etal: (id?: string) => e.etals.find((t) => t.id === id),
+    frais: (t: Etal) => e.horloge - t.debarque < 60,
+    depuis: (t: Etal) => { const d = e.horloge - t.debarque; return d < 60 ? 'il y a ' + d + ' min' : 'il y a ' + Math.floor(d / 60) + ' h' + (d % 60 ? ' ' + String(d % 60).padStart(2, '0') : ''); },
+    km: (t: Etal) => distanceKm(PORTS[e.commune], PORTS[t.port] ?? PORTS['Le Robert']),
+    minPrix: (t: Etal) => { const d = t.produits.filter((p) => p.dispoKg > 0); return d.length ? Math.min(...d.map((p) => p.prixKg)) : null; },
+    kgPanier: (etalId: string, produitId: string) => (e.panier?.etalId === etalId ? e.panier.lignes.find((l) => l.produitId === produitId)?.kg ?? 0 : 0),
+    creneaux: creneauxDe,
+    mesBons: () => e.bons.filter((b) => b.client === 'Vous').slice().reverse(),
+    bonsPecheur: (etalId?: string) => e.bons.filter((b) => b.etalId === etalId),
+    nonLusClient: () => Object.values(e.convs).filter((c) => c.client === 'Vous' && !c.luClient).length,
+    nonLusPecheur: (etalId?: string) => Object.values(e.convs).filter((c) => c.etalId === etalId && !c.luPecheur).length,
+    resume: (lignes: LignePanier[]) => lignes.map((l) => l.espece + ' ' + kg(l.kg)).join(', '),
+  }), [e]);
+
+  return { e, pret, ...actions, ...sel };
+}
+
+type Magasin = ReturnType<typeof useMagasin>;
+const Ctx = createContext<Magasin | null>(null);
+export function MagasinProvider({ children }: { children: React.ReactNode }) {
+  const m = useMagasin();
+  return <Ctx.Provider value={m}>{children}</Ctx.Provider>;
+}
+export function useApp() {
+  const m = useContext(Ctx);
+  if (!m) throw new Error('useApp doit être utilisé dans MagasinProvider');
+  return m;
+}

@@ -14,6 +14,8 @@ export const PORTS: Record<string, { lat: number; lon: number }> = {
   'Le Marin': { lat: 14.47, lon: -60.868 },
 };
 
+export const FILTRES = ['Tout', 'Moins d’1 h', 'Thon', 'Vivaneau', 'Dorade', 'Thazard', 'Colas', 'Langouste', 'Lambi'];
+
 export const ESPECES = ['Thon jaune', 'Bonite', 'Dorade coryphène', 'Balaou', 'Vivaneau', 'Colas', 'Coulirou', 'Thazard', 'Chatrou', 'Langouste', 'Lambi'];
 
 const p = (id: string, espece: string, prixKg: number, dispoKg: number, preps: [string, number][]) => ({
