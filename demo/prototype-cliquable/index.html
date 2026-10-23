@@ -1,0 +1,132 @@
+<title>Pêche Connect Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&family=Bebas+Neue&display=swap">
+<style>
+/* Mise en page : le téléphone au centre, à gauche la liste des écrans pour sauter directement à l'un d'eux. */
+:root{
+  --bg:#f3f3f1; --surface:#ffffff; --fg:#111111; --muted:#62625d; --line:#e5e5e2;
+  --logo:#0057d9; --accent:#ffd23f; --frame:#111111;
+  --display:'Bebas Neue', 'Arial Narrow', sans-serif;
+  --text:'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141413; --surface:#1d1d1b; --fg:#f3f3f1; --muted:#a5a59e; --line:#2e2e2b; --logo:#4d8dff; --frame:#3a3a37; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141413; --surface:#1d1d1b; --fg:#f3f3f1; --muted:#a5a59e; --line:#2e2e2b; --logo:#4d8dff; --frame:#3a3a37; color-scheme:dark}
+
+body{background:var(--bg);color:var(--fg);font-family:var(--text);font-size:16px;line-height:1.45;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:24px 40px}
+.wrap{max-width:1040px;margin:0 auto;display:grid;grid-template-columns:minmax(0, 1fr) auto;gap:40px;align-items:start}
+@media (max-width: 820px){.wrap{grid-template-columns:minmax(0, 1fr);gap:20px}.cote{order:2}}
+
+.cote{display:flex;flex-direction:column;gap:24px;min-width:0}
+.logo{display:flex;align-items:center;gap:14px}
+.logo .nom{font-family:var(--display);font-size:56px;line-height:.85;letter-spacing:2px;color:var(--logo);padding-top:5px}
+.logo .ph{border-left:4px solid var(--logo);padding-left:12px;font-weight:800;font-size:16px;line-height:1.35}
+.aide{margin:0;color:var(--muted);max-width:44ch}
+.aide b{color:var(--fg)}
+
+.groupe{display:flex;flex-direction:column;gap:8px}
+.groupe h2{margin:0;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.liste{display:flex;flex-direction:column;gap:6px}
+.liste button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border-radius:12px;
+  border:1px solid var(--line);background:var(--surface);color:var(--fg);font:600 15px var(--text);cursor:pointer}
+.liste button:hover{border-color:var(--fg)}
+.liste button:focus-visible{outline:3px solid var(--logo);outline-offset:2px}
+.liste button[aria-current="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.liste button[aria-current="true"] .n{background:var(--accent);color:#111111}
+.n{flex:none;min-width:24px;height:24px;border-radius:7px;background:var(--bg);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.liste small{margin-left:auto;font-size:13px;font-weight:500;opacity:.7}
+
+.scene{display:flex;flex-direction:column;align-items:center;gap:12px}
+.tel{position:relative;width:390px;height:844px;border-radius:44px;overflow:hidden;background:#ffffff;
+  box-shadow:0 0 0 10px var(--frame), 0 20px 50px rgba(0,0,0,.18);margin:10px;transform-origin:top center}
+.tel iframe{width:390px;height:844px;border:0;display:block}
+.barre{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.barre button{border:0;border-radius:999px;padding:9px 16px;font:700 14px var(--text);cursor:pointer;background:var(--surface);color:var(--fg);box-shadow:inset 0 0 0 1px var(--line)}
+.barre button:focus-visible{outline:3px solid var(--logo);outline-offset:2px}
+.ecran-nom{font-size:14px;color:var(--muted);font-weight:600;min-height:20px}
+</style>
+
+<div class="wrap">
+  <aside class="cote">
+    <div class="logo" aria-label="Pêche Connect : Réservez. Payez. Récupérez.">
+      <div class="nom">PÊCHE<br>CONNECT</div>
+      <div class="ph">Réservez.<br>Payez.<br>Récupérez.</div>
+    </div>
+    <p class="aide"><b>Touchez les boutons dans le téléphone</b> comme dans une vraie appli : un étal, « Voir mon panier », « Réserver et payer », « Itinéraire »… Ou choisissez un écran ci-dessous.</p>
+
+    <div class="groupe">
+      <h2>Parcours client</h2>
+      <div class="liste" id="client"></div>
+    </div>
+    <div class="groupe">
+      <h2>Espace pêcheur</h2>
+      <div class="liste" id="pecheur"></div>
+    </div>
+  </aside>
+
+  <div class="scene">
+    <div class="tel" id="tel"><iframe id="ecran" src="ecrans/1-accueil.html" title="Écran de l'application"></iframe></div>
+    <div class="ecran-nom" id="nom" aria-live="polite"></div>
+    <div class="barre">
+      <button type="button" id="retour">← Écran précédent</button>
+      <button type="button" id="debut">Recommencer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var ECRANS = [
+  {f:'1-accueil.html', t:'Accueil', g:'client', a:'Touchez un étal'},
+  {f:'6-carte-arrivages.html', t:'Carte des arrivages', g:'client'},
+  {f:'2-etal-pecheur.html', t:'Étal du pêcheur', g:'client', a:'« Voir mon panier »'},
+  {f:'3-panier-paiement.html', t:'Panier et paiement', g:'client', a:'« Réserver et payer »'},
+  {f:'4-bon-de-retrait.html', t:'Bon de retrait', g:'client', a:'« Itinéraire » ou « Message »'},
+  {f:'8-itineraire.html', t:'Itinéraire', g:'client', a:'Waze ou Google Maps'},
+  {f:'7-messagerie.html', t:'Messagerie', g:'client', a:'« J’arrive dans 10 min »'},
+  {f:'9-position-recue.html', t:'Position du pêcheur', g:'client', a:'« Y aller »'},
+  {f:'5-pecheur-publier.html', t:'Publier l’arrivage', g:'pecheur'},
+  {f:'10-pecheur-position.html', t:'Envoyer ma position', g:'pecheur'}
+];
+var frame = document.getElementById('ecran');
+var historique = [];
+var boutons = {};
+
+ECRANS.forEach(function (e) {
+  var b = document.createElement('button');
+  b.type = 'button';
+  var num = ECRANS.filter(function (x) { return x.g === e.g; }).indexOf(e) + 1;
+  b.innerHTML = '<span class="n">' + num + '</span>' + e.t + (e.a ? '<small>' + e.a + '</small>' : '');
+  b.addEventListener('click', function () { frame.src = 'ecrans/' + e.f; });
+  document.getElementById(e.g).appendChild(b);
+  boutons[e.f] = b;
+});
+
+function courant() {
+  try { return frame.contentWindow.location.pathname.split('/').pop(); } catch (err) { return null; }
+}
+frame.addEventListener('load', function () {
+  var f = courant();
+  if (!f) return;
+  if (historique[historique.length - 1] !== f) historique.push(f);
+  Object.keys(boutons).forEach(function (k) { boutons[k].setAttribute('aria-current', k === f ? 'true' : 'false'); });
+  var e = ECRANS.find(function (x) { return x.f === f; });
+  document.getElementById('nom').textContent = e ? e.t + (e.a ? ' · essayez ' + e.a : '') : '';
+});
+document.getElementById('retour').addEventListener('click', function () {
+  if (historique.length > 1) { historique.pop(); var p = historique.pop(); frame.src = 'ecrans/' + p; }
+});
+document.getElementById('debut').addEventListener('click', function () { historique = []; frame.src = 'ecrans/1-accueil.html'; });
+
+// Sur petit écran, on réduit le téléphone pour qu'il tienne en largeur.
+var tel = document.getElementById('tel');
+function ajuster() {
+  var dispo = document.querySelector('.scene').clientWidth - 24;
+  var k = Math.min(1, dispo / 410);
+  tel.style.transform = k < 1 ? 'scale(' + k + ')' : '';
+  tel.style.marginBottom = k < 1 ? (10 - 844 * (1 - k)) + 'px' : '10px';
+}
+window.addEventListener('resize', ajuster);
+ajuster();
+</script>

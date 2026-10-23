@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "Pêche Connect",
+    "slug": "peche-connect",
+    "scheme": "pecheconnect",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": { "bundleIdentifier": "fr.pecheconnect.app", "supportsTablet": false },
+    "android": { "package": "fr.pecheconnect.app" },
+    "web": { "bundler": "metro", "output": "single" },
+    "plugins": ["expo-router"],
+    "experiments": { "typedRoutes": false }
+  }
+}

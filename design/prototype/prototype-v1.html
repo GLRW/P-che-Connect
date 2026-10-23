@@ -1,0 +1,403 @@
+<title>Pêche du Jour Martinique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: étal de marché — une colonne d'arrivages comme des ardoises de port, filtres collants, espace pêcheur séparé */
+:root{
+  --bg:#eef3f3;          /* glace pilée */
+  --surface:#ffffff;
+  --ink:#0f2a33;         /* bleu nuit du large */
+  --muted:#557079;
+  --line:#d3dfe1;
+  --sea:#0b6e73;         /* bleu-vert des fonds */
+  --sea-soft:#dcefee;
+  --coral:#d9483b;       /* robe du vivaneau */
+  --coral-soft:#fbe6e3;
+  --ok:#2f7d4f; --ok-soft:#e2f2e8;
+  --warn:#9a6a00; --warn-soft:#fbf0d4;
+  --f-display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-data:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b1a1f;--surface:#11262d;--ink:#e3eef0;--muted:#8ea8ae;--line:#24414a;
+  --sea:#4fc1bf;--sea-soft:#163a3d;--coral:#ff7a6b;--coral-soft:#3a1f1d;
+  --ok:#6fcf97;--ok-soft:#173528;--warn:#e7b84a;--warn-soft:#3a2f12;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b1a1f;--surface:#11262d;--ink:#e3eef0;--muted:#8ea8ae;--line:#24414a;
+  --sea:#4fc1bf;--sea-soft:#163a3d;--coral:#ff7a6b;--coral-soft:#3a1f1d;
+  --ok:#6fcf97;--ok-soft:#173528;--warn:#e7b84a;--warn-soft:#3a2f12;color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
+.wrap{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:0 64px}
+h1,h2,h3{font-family:var(--f-display);font-stretch:85%;text-wrap:balance;margin:0;line-height:1.1}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--sea);outline-offset:2px}
+
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;padding-block:28px 16px}
+.brand h1{font-size:clamp(30px,6vw,44px);font-weight:800;letter-spacing:-.01em}
+.brand h1 span{color:var(--coral)}
+.brand p{margin:4px 0 0;color:var(--muted);max-width:52ch}
+nav.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px}
+nav.tabs button{border:0;background:transparent;padding:8px 14px;border-radius:999px;cursor:pointer;font-weight:700;font-size:14px;color:var(--muted)}
+nav.tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+
+.banner{font-size:14px;padding:10px 14px;border-radius:10px;background:var(--warn-soft);color:var(--warn);margin-bottom:16px}
+
+.filters{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.filters label{display:flex;flex-direction:column;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);gap:3px;font-weight:700}
+.filters select,.filters input[type=number]{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:15px;text-transform:none;letter-spacing:0;font-weight:400}
+.filters .check{flex-direction:row;align-items:center;gap:8px;align-self:end;padding-bottom:8px;text-transform:none;letter-spacing:0;font-size:15px;color:var(--ink);font-weight:400}
+.count{font-size:14px;color:var(--muted);margin:0 0 12px}
+
+.list{display:flex;flex-direction:column;gap:16px}
+.arr{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.arr-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 16px;padding:16px 18px 12px;border-bottom:1px dashed var(--line)}
+.arr-head h3{font-size:24px;font-weight:800}
+.arr-head .where{color:var(--muted);font-size:14px}
+.when{font-family:var(--f-data);font-size:13px;background:var(--sea-soft);color:var(--sea);padding:4px 10px;border-radius:6px;align-self:flex-start;white-space:nowrap}
+.tag-ex{font-family:var(--f-data);font-size:11px;background:var(--warn-soft);color:var(--warn);padding:2px 6px;border-radius:4px;margin-left:6px;vertical-align:middle}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;padding:10px 18px;font-size:14px;color:var(--muted)}
+.meta b{color:var(--ink);font-weight:700}
+
+.fish{width:100%;border-collapse:collapse}
+.fish-wrap{overflow-x:auto}
+.fish th{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);text-align:left;padding:6px 18px;font-weight:700}
+.fish td{padding:10px 18px;border-top:1px solid var(--line);vertical-align:middle}
+.fish .num{font-family:var(--f-data);font-variant-numeric:tabular-nums;white-space:nowrap}
+.price{font-family:var(--f-data);font-weight:700;font-size:18px;color:var(--coral)}
+.price small{font-size:12px;color:var(--muted);font-weight:500}
+.sp{font-weight:700;font-size:17px}
+.pill{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--sea-soft);color:var(--sea);white-space:nowrap}
+.pill.off{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.low{color:var(--warn)} .out{color:var(--muted);text-decoration:line-through}
+
+.btn{border:0;border-radius:9px;padding:9px 14px;font-weight:700;cursor:pointer;background:var(--ink);color:var(--bg);white-space:nowrap}
+.btn.coral{background:var(--coral);color:#fff}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.small{padding:6px 10px;font-size:14px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+.contact{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 18px;background:var(--bg);border-top:1px solid var(--line);font-size:14px}
+.tel{font-family:var(--f-data);font-weight:700;user-select:all}
+.contact a{color:var(--sea);font-weight:700}
+
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:28px;text-align:center;color:var(--muted)}
+
+/* Modal */
+.overlay{position:fixed;inset:0;background:rgba(5,20,25,.55);display:flex;align-items:flex-end;justify-content:center;z-index:20;padding:16px}
+@media(min-width:640px){.overlay{align-items:center}}
+.sheet{background:var(--surface);border-radius:16px;max-width:480px;width:100%;max-height:calc(100% - 16px);overflow:auto;padding:22px}
+.sheet h2{font-size:26px;margin-bottom:4px}
+.sheet .sub{color:var(--muted);margin:0 0 16px;font-size:14px}
+
+form.grid{display:grid;gap:12px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field>span{font-size:13px;font-weight:700;color:var(--muted)}
+.field input,.field select{padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--surface);width:100%}
+.row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg label{flex:1;min-width:120px;border:1px solid var(--line);border-radius:9px;padding:10px;cursor:pointer;display:flex;gap:8px;align-items:center;font-size:14px}
+.seg input{accent-color:var(--sea)}
+.seg label:has(input:checked){border-color:var(--sea);background:var(--sea-soft)}
+.total{background:var(--bg);border-radius:10px;padding:12px 14px;font-size:14px}
+.total .big{font-family:var(--f-data);font-size:22px;font-weight:700}
+.note{font-size:13px;color:var(--muted)}
+.actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.msg{font-size:14px;padding:10px 12px;border-radius:9px}
+.msg.err{background:var(--coral-soft);color:var(--coral)}
+.msg.ok{background:var(--ok-soft);color:var(--ok)}
+
+/* Espace pêcheur */
+.cols{display:grid;grid-template-columns:1fr;gap:20px}
+@media(min-width:860px){.cols{grid-template-columns:1.1fr .9fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.panel h2{font-size:22px;margin-bottom:12px}
+.sprow{display:grid;grid-template-columns:1.4fr .8fr .8fr .8fr auto;gap:6px;align-items:end}
+@media(max-width:560px){.sprow{grid-template-columns:1fr 1fr}.sprow .rm{grid-column:span 2}}
+.sprow .field>span{font-size:11px}
+.res{border-top:1px solid var(--line);padding-block:12px;display:flex;flex-direction:column;gap:6px}
+.res:first-of-type{border-top:0}
+.res .top{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.st{font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px}
+.st.attente{background:var(--warn-soft);color:var(--warn)}
+.st.retiree{background:var(--ok-soft);color:var(--ok)}
+.st.annulee{background:var(--line);color:var(--muted)}
+.inline{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.inline input{width:110px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:30}
+@media (prefers-reduced-motion:no-preference){.arr{animation:rise .35s ease both}@keyframes rise{from{transform:translateY(6px)}to{transform:none}}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Pêche <span>du jour</span></h1>
+      <p>Les arrivages des pêcheurs de Martinique, au prix du kilo. Réservez votre poisson et récupérez-le au port ou au marché.</p>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" id="tab-arrivages" aria-selected="true" data-view="arrivages">Arrivages</button>
+      <button role="tab" id="tab-mes" aria-selected="false" data-view="mes">Mes réservations</button>
+      <button role="tab" id="tab-pecheur" aria-selected="false" data-view="pecheur">Espace pêcheur</button>
+    </nav>
+  </header>
+
+  <div id="banner" class="banner" hidden></div>
+
+  <!-- CLIENT -->
+  <section id="view-arrivages">
+    <div class="filters">
+      <label>Espèce<select id="f-espece"><option value="">Toutes</option></select></label>
+      <label>Commune<select id="f-commune"><option value="">Toute l'île</option></select></label>
+      <label>Prix max €/kg<input id="f-prix" type="number" min="0" step="1" placeholder="—"></label>
+      <label class="check"><input id="f-nettoye" type="checkbox"> Nettoyage proposé</label>
+    </div>
+    <p class="count" id="count"></p>
+    <div class="list" id="list"></div>
+  </section>
+
+  <section id="view-mes" hidden>
+    <div class="panel">
+      <h2>Mes réservations</h2>
+      <p class="note">Les réservations faites depuis cet appareil.</p>
+      <div id="mes-list"></div>
+    </div>
+  </section>
+
+  <!-- PÊCHEUR -->
+  <section id="view-pecheur" hidden>
+    <div class="cols">
+      <div class="panel">
+        <h2>Publier un arrivage</h2>
+        <form id="pub" class="grid">
+          <div class="row2">
+            <label class="field"><span>Nom du pêcheur</span><input id="p-nom" required placeholder="Ex. Jean-Marc L."></label>
+            <label class="field"><span>Téléphone</span><input id="p-tel" required inputmode="tel" placeholder="0696 12 34 56"></label>
+          </div>
+          <div class="row2">
+            <label class="field"><span>Immatriculation du bateau</span><input id="p-bateau" placeholder="FDF 123456"></label>
+            <label class="field"><span>Zone de pêche</span><input id="p-zone" placeholder="Large du Robert, DCP…"></label>
+          </div>
+          <div class="row2">
+            <label class="field"><span>Commune</span><select id="p-commune" required></select></label>
+            <label class="field"><span>Lieu de retrait</span><input id="p-lieu" required placeholder="Ponton des pêcheurs, marché couvert…"></label>
+          </div>
+          <div class="row2">
+            <label class="field"><span>Type de lieu</span><select id="p-type"><option value="port">Port / débarcadère</option><option value="marche">Marché communal</option></select></label>
+            <label class="field"><span>Retrait possible jusqu'à</span><input id="p-jusqua" type="time" value="13:00"></label>
+          </div>
+          <div>
+            <p class="note" style="margin:4px 0 8px">Poissons débarqués · supplément nettoyage à 0 si vous ne nettoyez pas.</p>
+            <div id="sp-rows" style="display:flex;flex-direction:column;gap:10px"></div>
+            <button type="button" class="btn ghost small" id="add-sp" style="margin-top:10px">+ Ajouter une espèce</button>
+          </div>
+          <div id="pub-msg" class="msg" hidden></div>
+          <div class="actions"><button class="btn coral" type="submit">Publier l'arrivage</button></div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2>Mes ventes</h2>
+        <label class="field"><span>Mon numéro de téléphone</span><input id="me-tel" inputmode="tel" placeholder="Le numéro utilisé pour publier"></label>
+        <div id="my-arr" style="margin-top:14px"></div>
+        <h3 style="font-size:18px;margin:18px 0 4px">Réservations reçues</h3>
+        <div id="my-res"><p class="note">Saisissez votre numéro pour voir vos réservations.</p></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="modal" class="overlay" hidden></div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+const ESPECES=["Vivaneau","Thazard","Dorade coryphène","Thon jaune","Thon noir","Bonite","Marlin bleu","Poisson volant","Balaou","Coulirou","Carangue","Mérou","Colas","Sarde","Chatrou (poulpe)","Lambi","Langouste","Daurade"];
+const COMMUNES=["Basse-Pointe","Bellefontaine","Case-Pilote","Le Carbet","Le Diamant","Fort-de-France","Le François","Grand-Rivière","Les Anses-d'Arlet","Le Lorrain","Macouba","Le Marigot","Le Marin","Le Prêcheur","Le Robert","Sainte-Anne","Sainte-Luce","Sainte-Marie","Saint-Pierre","Les Trois-Îlets","La Trinité","Le Vauclin"];
+const CRENEAUX=["Dès l'arrivée","Avant 10 h","10 h – 12 h","12 h – 14 h","Après 14 h"];
+
+let store=null, arrivages=[], reservations=[], demo=false, canWrite=true;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const eur=n=>(Math.round(n*100)/100).toLocaleString("fr-FR",{minimumFractionDigits:2,maximumFractionDigits:2})+" €";
+const kg=n=>(Math.round(n*10)/10).toLocaleString("fr-FR")+" kg";
+const ls={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
+function toast(t){const el=$("#toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2600)}
+function when(iso){const d=new Date(iso),n=new Date();const day=d.toDateString()===n.toDateString()?"Aujourd'hui":(new Date(n-864e5).toDateString()===d.toDateString()?"Hier":d.toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"}));return day+" · "+d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}
+const normTel=t=>String(t||"").replace(/\D/g,"");
+
+/* ---- stockage : base partagée, ou démo en mémoire ---- */
+function demoData(){const h=x=>new Date(Date.now()-x*36e5).toISOString();return{
+ arrivages:[
+  {id:"ex1",exemple:true,pecheur:"Jean-Marc L.",tel:"0696 00 00 01",bateau:"FDF 000001",zone:"DCP au large du Robert",commune:"Le Robert",lieu:"Ponton des pêcheurs, front de mer",type:"port",jusqua:"12:30",statut:"ouvert",createdAt:h(1),
+   especes:[{nom:"Thon jaune",prixKg:14,kg:30,supp:2},{nom:"Dorade coryphène",prixKg:13,kg:18,supp:2},{nom:"Balaou",prixKg:10,kg:8,supp:0}]},
+  {id:"ex2",exemple:true,pecheur:"Marie-Line C.",tel:"0696 00 00 02",bateau:"FDF 000002",zone:"Côte caraïbe, Case-Pilote",commune:"Case-Pilote",lieu:"Débarcadère du bourg",type:"port",jusqua:"11:00",statut:"ouvert",createdAt:h(2),
+   especes:[{nom:"Vivaneau",prixKg:16,kg:12,supp:3},{nom:"Colas",prixKg:15,kg:6,supp:3}]},
+  {id:"ex3",exemple:true,pecheur:"Rodrigue T.",tel:"0696 00 00 03",bateau:"FDF 000003",zone:"Canal de Sainte-Lucie",commune:"Sainte-Luce",lieu:"Marché aux poissons, bord de mer",type:"marche",jusqua:"13:00",statut:"ouvert",createdAt:h(3),
+   especes:[{nom:"Thazard",prixKg:15,kg:20,supp:2},{nom:"Poisson volant",prixKg:9,kg:15,supp:1.5},{nom:"Chatrou (poulpe)",prixKg:17,kg:5,supp:0}]}],
+ reservations:[]}}
+function memStore(){const d=demoData();const subs={arrivages:[],reservations:[]};const emit=c=>subs[c].forEach(f=>f(d[c]));
+ return{sub(c,f){subs[c].push(f);f(d[c])},async add(c,o){o.id="m"+Math.random().toString(36).slice(2,9);d[c]=[...d[c],o];emit(c);return o.id},async update(c,id,p){d[c]=d[c].map(x=>x.id===id?{...x,...p}:x);emit(c)}}}
+function dbStore(db){return{
+ sub(c,f){db.collection(c).onSnapshot(s=>f(s.docs.map(x=>({id:x.id,...x.data()}))),e=>{showBanner("Connexion à la base interrompue. Rechargez la page.")})},
+ async add(c,o){const r=await db.collection(c).add(o);return r.id},
+ async update(c,id,p){await db.collection(c).doc(id).update(p)}}}
+function showBanner(t){const b=$("#banner");b.textContent=t;b.hidden=false}
+
+/* ---- calculs ---- */
+function reserved(arrId,nom){return reservations.filter(r=>r.arrivageId===arrId&&r.espece===nom&&r.statut!=="annulee").reduce((s,r)=>s+(+r.kg||0),0)}
+function restant(a,e){return Math.max(0,(+e.kg||0)-reserved(a.id,e.nom))}
+
+/* ---- vue client ---- */
+function fillSelects(){
+ const fe=$("#f-espece"),fc=$("#f-commune"),pc=$("#p-commune");
+ const seenE=new Set(ESPECES);arrivages.forEach(a=>(a.especes||[]).forEach(e=>seenE.add(e.nom)));
+ const curE=fe.value,curC=fc.value;
+ fe.innerHTML='<option value="">Toutes</option>'+[...seenE].sort((a,b)=>a.localeCompare(b,"fr")).map(e=>`<option>${esc(e)}</option>`).join("");fe.value=curE;
+ fc.innerHTML='<option value="">Toute l\'île</option>'+COMMUNES.map(c=>`<option>${esc(c)}</option>`).join("");fc.value=curC;
+ if(!pc.options.length)pc.innerHTML='<option value="">Choisir…</option>'+COMMUNES.map(c=>`<option>${esc(c)}</option>`).join("");
+}
+function renderList(){
+ const fe=$("#f-espece").value,fc=$("#f-commune").value,fp=parseFloat($("#f-prix").value),fn=$("#f-nettoye").checked;
+ const open=arrivages.filter(a=>a.statut!=="clos").sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
+ const out=[];
+ for(const a of open){
+  if(fc&&a.commune!==fc)continue;
+  const sp=(a.especes||[]).filter(e=>(!fe||e.nom===fe)&&(isNaN(fp)||e.prixKg<=fp)&&(!fn||e.supp>0));
+  if(!sp.length)continue;out.push({a,sp});
+ }
+ $("#count").textContent=out.length?`${out.length} arrivage${out.length>1?"s":""} en vente`:"";
+ if(!open.length){$("#list").innerHTML=`<div class="empty"><b>Aucun arrivage pour le moment.</b><br>Les pêcheurs publient leurs prises depuis l'Espace pêcheur dès leur retour au port.</div>`;return}
+ if(!out.length){$("#list").innerHTML=`<div class="empty">Aucun arrivage ne correspond à ces filtres.</div>`;return}
+ $("#list").innerHTML=out.map(({a,sp})=>{
+  const maps="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(a.lieu+", "+a.commune+", Martinique");
+  return `<article class="arr">
+   <div class="arr-head"><div><h3>${esc(a.commune)}${a.exemple?'<span class="tag-ex">EXEMPLE</span>':""}</h3>
+    <div class="where">${a.type==="marche"?"Marché":"Port"} · ${esc(a.lieu)} · retrait jusqu'à ${esc(a.jusqua||"—")}</div></div>
+    <span class="when">${esc(when(a.createdAt))}</span></div>
+   <div class="meta"><span>Pêcheur <b>${esc(a.pecheur)}</b></span>${a.bateau?`<span>Bateau <b>${esc(a.bateau)}</b></span>`:""}${a.zone?`<span>Zone <b>${esc(a.zone)}</b></span>`:""}</div>
+   <div class="fish-wrap"><table class="fish"><thead><tr><th>Espèce</th><th>Prix au kilo</th><th>Disponible</th><th>Nettoyage</th><th></th></tr></thead><tbody>
+   ${sp.map(e=>{const r=restant(a,e);const i=a.especes.indexOf(e);return `<tr>
+     <td class="sp">${esc(e.nom)}</td>
+     <td class="price">${eur(e.prixKg)}<small>/kg</small></td>
+     <td class="num ${r===0?"out":r<3?"low":""}">${r===0?"Épuisé":kg(r)}</td>
+     <td>${e.supp>0?`<span class="pill">+${eur(e.supp)}/kg</span>`:`<span class="pill off">Entier</span>`}</td>
+     <td style="text-align:right"><button class="btn small coral" data-res="${esc(a.id)}" data-i="${i}" ${r===0?"disabled":""}>Réserver</button></td></tr>`}).join("")}
+   </tbody></table></div>
+   <div class="contact">Contact <span class="tel">${esc(a.tel)}</span><button class="btn ghost small" data-copy="${esc(a.tel)}">Copier</button><a href="${maps}" target="_blank" rel="noopener">Itinéraire ↗</a></div>
+  </article>`}).join("");
+}
+
+/* ---- réservation ---- */
+function openReserve(a,i){
+ const e=a.especes[i],max=restant(a,e);
+ const m=$("#modal");m.hidden=false;
+ m.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="r-title">
+  <h2 id="r-title">${esc(e.nom)}</h2><p class="sub">${esc(a.pecheur)} · ${esc(a.lieu)}, ${esc(a.commune)} · ${eur(e.prixKg)}/kg</p>
+  <form class="grid" id="rf">
+   <div class="row2"><label class="field"><span>Quantité souhaitée (kg)</span><input id="r-kg" type="number" min="0.5" step="0.5" max="${max}" value="${Math.min(2,max)}" required></label>
+   <label class="field"><span>Créneau de retrait</span><select id="r-cr">${CRENEAUX.map(c=>`<option>${c}</option>`).join("")}</select></label></div>
+   <div class="seg"><label><input type="radio" name="r-net" value="0" checked> Entier</label>${e.supp>0?`<label><input type="radio" name="r-net" value="1"> Nettoyé (+${eur(e.supp)}/kg)</label>`:""}</div>
+   <div class="row2"><label class="field"><span>Votre nom</span><input id="r-nom" required autocomplete="name"></label>
+   <label class="field"><span>Téléphone</span><input id="r-tel" required inputmode="tel" autocomplete="tel"></label></div>
+   <div class="total"><div>Empreinte bancaire</div><div class="big" id="r-tot"></div>
+    <div class="note">Seul le montant réel est débité après la pesée par le pêcheur. Le poids peut varier légèrement.</div></div>
+   <p class="note">Prototype : le paiement n'est pas encore branché, aucune carte n'est demandée.</p>
+   <div id="r-msg" class="msg err" hidden></div>
+   <div class="actions"><button type="button" class="btn ghost" id="r-cancel">Annuler</button><button class="btn coral" type="submit">Réserver</button></div>
+  </form></div>`;
+ const saved=ls.get("pdj-client",{});$("#r-nom").value=saved.nom||"";$("#r-tel").value=saved.tel||"";
+ const calc=()=>{const q=parseFloat($("#r-kg").value)||0;const net=m.querySelector('input[name="r-net"]:checked').value==="1";
+   const unit=e.prixKg+(net?e.supp:0);$("#r-tot").textContent=eur(q*unit*1.1)+" max";return{q,net,unit}};
+ calc();m.querySelectorAll("#r-kg,input[name=r-net]").forEach(x=>x.addEventListener("input",calc));
+ $("#r-cancel").onclick=closeModal;
+ $("#rf").onsubmit=async ev=>{ev.preventDefault();const{q,net,unit}=calc();const msg=$("#r-msg");
+  if(q<=0||q>restant(a,e)){msg.textContent=`Il reste ${kg(restant(a,e))} de ${e.nom}. Ajustez la quantité.`;msg.hidden=false;return}
+  const nom=$("#r-nom").value.trim(),tel=$("#r-tel").value.trim();ls.set("pdj-client",{nom,tel});
+  const r={arrivageId:a.id,pecheurTel:normTel(a.tel),espece:e.nom,kg:q,nettoye:net,prixKg:unit,estimation:Math.round(q*unit*100)/100,creneau:$("#r-cr").value,
+    client:nom,clientTel:tel,statut:"attente",createdAt:new Date().toISOString(),lieu:a.lieu,commune:a.commune,pecheur:a.pecheur,telPecheur:a.tel};
+  try{const id=await store.add("reservations",r);const mine=ls.get("pdj-mes",[]);mine.push(id);ls.set("pdj-mes",mine);closeModal();toast("Réservation envoyée au pêcheur");}
+  catch(err){msg.textContent="La réservation n'a pas pu être enregistrée. Vérifiez votre connexion puis réessayez.";msg.hidden=false}};
+}
+function closeModal(){const m=$("#modal");m.hidden=true;m.innerHTML=""}
+
+/* ---- mes réservations ---- */
+function renderMes(){
+ const ids=new Set(ls.get("pdj-mes",[]));const mine=reservations.filter(r=>ids.has(r.id)).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
+ $("#mes-list").innerHTML=mine.length?mine.map(r=>`<div class="res"><div class="top"><b>${esc(r.espece)} · ${kg(r.kg)}${r.nettoye?" · nettoyé":""}</b>${stBadge(r)}</div>
+  <div class="note">${esc(r.lieu)}, ${esc(r.commune)} · ${esc(r.creneau)} · ${esc(r.pecheur)} <span class="tel">${esc(r.telPecheur)}</span></div>
+  <div class="num">${r.statut==="retiree"?`Débité : <b>${eur(r.montantFinal)}</b> (${kg(r.poidsReel)})`:`Estimation : ${eur(r.estimation)}`}</div></div>`).join("")
+  :`<p class="note" style="margin-top:12px">Aucune réservation pour l'instant. Choisissez un poisson dans l'onglet Arrivages.</p>`;
+}
+const stBadge=r=>`<span class="st ${r.statut}">${{attente:"À retirer",retiree:"Retirée",annulee:"Annulée"}[r.statut]||r.statut}</span>`;
+
+/* ---- espace pêcheur ---- */
+function spRow(v={}){const d=document.createElement("div");d.className="sprow";
+ d.innerHTML=`<label class="field"><span>Espèce</span><input list="dl-esp" class="s-nom" required value="${esc(v.nom||"")}"></label>
+ <label class="field"><span>€/kg</span><input type="number" class="s-prix" min="0" step="0.5" required value="${v.prixKg??""}"></label>
+ <label class="field"><span>Kg</span><input type="number" class="s-kg" min="0.5" step="0.5" required value="${v.kg??""}"></label>
+ <label class="field"><span>Nettoyage €/kg</span><input type="number" class="s-supp" min="0" step="0.5" value="${v.supp??0}"></label>
+ <button type="button" class="btn ghost small rm" aria-label="Retirer">✕</button>`;
+ d.querySelector(".rm").onclick=()=>{if($("#sp-rows").children.length>1)d.remove()};$("#sp-rows").appendChild(d)}
+function renderPecheur(){
+ const t=normTel($("#me-tel").value);
+ if(!t){$("#my-arr").innerHTML="";$("#my-res").innerHTML='<p class="note">Saisissez votre numéro pour voir vos réservations.</p>';return}
+ const mineA=arrivages.filter(a=>normTel(a.tel)===t&&a.statut!=="clos");
+ $("#my-arr").innerHTML=mineA.length?mineA.map(a=>`<div class="res"><div class="top"><b>${esc(a.commune)} · ${esc(when(a.createdAt))}</b><button class="btn ghost small" data-close="${esc(a.id)}">Clôturer la vente</button></div>
+   <div class="note">${(a.especes||[]).map(e=>`${esc(e.nom)} : ${kg(restant(a,e))} restants / ${kg(e.kg)}`).join(" · ")}</div></div>`).join(""):'<p class="note">Aucun arrivage en cours avec ce numéro.</p>';
+ const res=reservations.filter(r=>r.pecheurTel===t).sort((a,b)=>(a.statut==="attente"?0:1)-(b.statut==="attente"?0:1)||String(b.createdAt).localeCompare(String(a.createdAt)));
+ $("#my-res").innerHTML=res.length?res.map(r=>`<div class="res"><div class="top"><b>${esc(r.client)} · ${esc(r.espece)} ${kg(r.kg)}${r.nettoye?" nettoyé":""}</b>${stBadge(r)}</div>
+  <div class="note">${esc(r.creneau)} · <span class="tel">${esc(r.clientTel)}</span> · ${eur(r.prixKg)}/kg · estimation ${eur(r.estimation)}</div>
+  ${r.statut==="attente"?`<div class="inline"><input type="number" step="0.05" min="0" placeholder="Poids pesé (kg)" id="w-${esc(r.id)}"><button class="btn small" data-peser="${esc(r.id)}">Valider la pesée</button><button class="btn ghost small" data-annul="${esc(r.id)}">Annuler</button></div>`
+   :r.statut==="retiree"?`<div class="num">Pesé ${kg(r.poidsReel)} · encaissé <b>${eur(r.montantFinal)}</b></div>`:""}</div>`).join(""):'<p class="note">Aucune réservation reçue pour l\'instant.</p>';
+}
+
+/* ---- événements ---- */
+document.addEventListener("click",async ev=>{
+ const b=ev.target.closest("button");if(!b)return;
+ if(b.dataset.view){document.querySelectorAll("nav.tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));["arrivages","mes","pecheur"].forEach(v=>$("#view-"+v).hidden=v!==b.dataset.view);ls.set("pdj-tab",b.dataset.view);return}
+ if(b.dataset.res){const a=arrivages.find(x=>x.id===b.dataset.res);if(a)openReserve(a,+b.dataset.i);return}
+ if(b.dataset.copy){try{await navigator.clipboard.writeText(b.dataset.copy);toast("Numéro copié")}catch{const s=b.previousElementSibling;const r=document.createRange();r.selectNodeContents(s);getSelection().removeAllRanges();getSelection().addRange(r);toast("Numéro sélectionné")}return}
+ if(b.dataset.close){await store.update("arrivages",b.dataset.close,{statut:"clos"}).catch(()=>toast("Action impossible pour le moment"));toast("Vente clôturée");return}
+ if(b.dataset.annul){await store.update("reservations",b.dataset.annul,{statut:"annulee"}).catch(()=>toast("Action impossible pour le moment"));return}
+ if(b.dataset.peser){const id=b.dataset.peser,r=reservations.find(x=>x.id===id),w=parseFloat($("#w-"+CSS.escape(id)).value);
+  if(!(w>0)){toast("Indiquez le poids pesé");return}
+  await store.update("reservations",id,{statut:"retiree",poidsReel:w,montantFinal:Math.round(w*r.prixKg*100)/100}).catch(()=>toast("Action impossible pour le moment"));toast("Pesée validée, montant encaissé");}
+});
+$("#modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#modal").hidden)closeModal()});
+["#f-espece","#f-commune","#f-prix","#f-nettoye"].forEach(s=>$(s).addEventListener("input",renderList));
+$("#me-tel").addEventListener("input",()=>{ls.set("pdj-pecheur-tel",$("#me-tel").value);renderPecheur()});
+$("#add-sp").onclick=()=>spRow();
+$("#pub").onsubmit=async ev=>{ev.preventDefault();const msg=$("#pub-msg");
+ const especes=[...document.querySelectorAll(".sprow")].map(r=>({nom:r.querySelector(".s-nom").value.trim(),prixKg:+r.querySelector(".s-prix").value,kg:+r.querySelector(".s-kg").value,supp:+r.querySelector(".s-supp").value||0})).filter(e=>e.nom&&e.prixKg>0&&e.kg>0);
+ if(!especes.length){msg.className="msg err";msg.textContent="Ajoutez au moins une espèce avec un prix et une quantité.";msg.hidden=false;return}
+ const a={pecheur:$("#p-nom").value.trim(),tel:$("#p-tel").value.trim(),bateau:$("#p-bateau").value.trim(),zone:$("#p-zone").value.trim(),commune:$("#p-commune").value,lieu:$("#p-lieu").value.trim(),type:$("#p-type").value,jusqua:$("#p-jusqua").value,statut:"ouvert",createdAt:new Date().toISOString(),especes};
+ ls.set("pdj-pecheur",{nom:a.pecheur,tel:a.tel,bateau:a.bateau,commune:a.commune,lieu:a.lieu,type:a.type});
+ try{await store.add("arrivages",a);msg.className="msg ok";msg.textContent="Arrivage publié. Les clients le voient dans l'onglet Arrivages.";msg.hidden=false;
+   $("#sp-rows").innerHTML="";spRow();$("#me-tel").value=a.tel;ls.set("pdj-pecheur-tel",a.tel);renderPecheur()}
+ catch{msg.className="msg err";msg.textContent=canWrite?"L'arrivage n'a pas pu être publié. Vérifiez votre connexion puis réessayez.":"Votre accès à cette page est en lecture seule : demandez au propriétaire un accès Contributeur.";msg.hidden=false}};
+
+function renderAll(){fillSelects();renderList();renderMes();renderPecheur()}
+
+/* ---- démarrage ---- */
+(function init(){
+ const dl=document.createElement("datalist");dl.id="dl-esp";dl.innerHTML=ESPECES.map(e=>`<option value="${esc(e)}">`).join("");document.body.appendChild(dl);
+ fillSelects();spRow();
+ const p=ls.get("pdj-pecheur",{});$("#p-nom").value=p.nom||"";$("#p-tel").value=p.tel||"";$("#p-bateau").value=p.bateau||"";$("#p-commune").value=p.commune||"";$("#p-lieu").value=p.lieu||"";if(p.type)$("#p-type").value=p.type;
+ $("#me-tel").value=ls.get("pdj-pecheur-tel","");
+ const tab=ls.get("pdj-tab","arrivages");const tb=document.querySelector(`nav.tabs button[data-view="${tab}"]`);if(tb)tb.click();
+ renderList();
+ let started=false;
+ const start=s=>{if(started)return;started=true;store=s;
+   store.sub("arrivages",d=>{arrivages=d;renderAll()});store.sub("reservations",d=>{reservations=d;renderAll()})};
+ (async()=>{
+   const db=window.claude?.use?await window.claude.use("db").catch(()=>null):null;
+   if(db){start(dbStore(db));
+     const u=await window.claude.use("user").catch(()=>null);const w=u?await u.can("data.write"):null;if(w===false){canWrite=false;showBanner("Vous consultez en lecture seule : vous pouvez voir les arrivages mais pas réserver ni publier.")}}
+   else{demo=true;showBanner("Mode démonstration : les données affichées sont des exemples et ne sont pas enregistrées.");start(memStore())}
+ })();
+ setTimeout(()=>{if(!started){demo=true;showBanner("Mode démonstration : les données affichées sont des exemples et ne sont pas enregistrées.");start(memStore())}},11000);
+})();
+</script>

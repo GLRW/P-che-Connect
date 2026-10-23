@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Carte des arrivages</title>
+</head>
+<body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&family=Bebas+Neue&display=swap">
+<style>
+body{margin:0;background:#ebebe8;display:flex;justify-content:center;padding:24px 0}
+.qr{background:repeating-linear-gradient(0deg,#111 0 6px,#fff 6px 10px)}
+</style>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #ffffff; color: #111111; font-family: Figtree, system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden; position: relative">
+
+  <header style="padding: 16px 16px 10px; display: flex; flex-direction: column; gap: 10px; background: #ffffff; z-index: 2">
+    <div style="display: flex; justify-content: space-between; align-items: center">
+      <div style="display: flex; align-items: center; gap: 10px"><span aria-label="Pêche Connect" style="width: 40px; height: 40px; border-radius: 10px; background: #0057d9; color: #ffffff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font: 400 21px 'Bebas Neue', sans-serif; letter-spacing: 1px; padding-top: 3px; box-sizing: border-box">PC</span><div style="display: flex; flex-direction: column"><span style="font-size: 12px; color: #62625d">Arrivages du jour</span><strong style="font-size: 17px">Toute la Martinique ▾</strong></div></div>
+      <div style="display: flex; background: #f3f3f1; border-radius: 999px; padding: 3px">
+        <span style="font: 700 13px Figtree; padding: 7px 12px; color: #62625d">Liste</span>
+        <span style="font: 700 13px Figtree; padding: 7px 12px; background: #111111; color: #ffffff; border-radius: 999px">Carte</span></div>
+    </div>
+    <div style="display: flex; gap: 8px; overflow: hidden">
+      <span style="font: 700 13px Figtree; background: #111111; color: #ffffff; border-radius: 999px; padding: 8px 14px; white-space: nowrap">Tout</span>
+      <span style="font: 700 13px Figtree; background: #fff6d6; color: #111111; border-radius: 999px; padding: 8px 14px; white-space: nowrap; box-shadow: inset 0 0 0 1.5px #ffd23f">Moins d'1 h</span>
+      <span style="font: 600 13px Figtree; background: #f3f3f1; border-radius: 999px; padding: 8px 14px; white-space: nowrap">Thon</span>
+      <span style="font: 600 13px Figtree; background: #f3f3f1; border-radius: 999px; padding: 8px 14px; white-space: nowrap">Vivaneau</span>
+      <span style="font: 600 13px Figtree; background: #f3f3f1; border-radius: 999px; padding: 8px 14px; white-space: nowrap">Langouste</span>
+    </div>
+  </header>
+
+  <div style="position: relative; flex-grow: 1; background: #eceeec; overflow: hidden">
+    <svg width="390" height="470" viewBox="0 0 390 470" style="position: absolute; left: 0; top: 0" aria-label="Carte de la Martinique">
+      <polygon points="69.8,58.0 129.4,73.4 181.5,119.6 226.2,165.8 256.0,196.6 300.8,150.4 278.4,181.2 263.5,219.7 300.8,265.9 330.6,312.1 338.0,373.7 323.1,427.6 293.3,427.6 278.4,389.1 241.1,381.4 181.5,373.7 136.8,366.0 144.3,312.1 166.7,289.0 136.8,273.6 92.2,227.4 62.4,165.8 40.0,104.2" fill="#ffffff" stroke="#d6d6d1" stroke-width="1.5" stroke-linejoin="round"/>
+    </svg>
+    <div style="position: absolute; left: 71.3px; top: 64.2px; transform: translate(-50%, -4px); display: flex; flex-direction: column; align-items: center"><span style="width: 8px; height: 8px; border-radius: 99px; background: #111111; box-shadow: 0 0 0 2px #fff"></span><span style="width: 2px; height: 8px; background: #111111"></span><span style="background: #111111; color: #ffffff; font: 800 12px Figtree; padding: 5px 8px; border-radius: 8px; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,.25);">2 étals</span><span style="font: 700 11px Figtree; color: #62625d; white-space: nowrap; background: rgba(255,255,255,.85); padding: 0 3px; border-radius: 4px; margin: 5px 0">Grand-Rivière</span></div><div style="position: absolute; left: 101.1px; top: 242.8px; transform: translate(-50%, calc(-100% + 4px)); display: flex; flex-direction: column; align-items: center"><span style="font: 700 11px Figtree; color: #62625d; white-space: nowrap; background: rgba(255,255,255,.85); padding: 0 3px; border-radius: 4px; margin: 5px 0">Case-Pilote</span><span style="background: #111111; color: #ffffff; font: 800 12px Figtree; padding: 5px 8px; border-radius: 8px; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,.25);">1 étal</span><span style="width: 2px; height: 8px; background: #111111"></span><span style="width: 8px; height: 8px; border-radius: 99px; background: #111111; box-shadow: 0 0 0 2px #fff"></span></div><div style="position: absolute; left: 151.7px; top: 271.3px; transform: translate(-50%, -4px); display: flex; flex-direction: column; align-items: center"><span style="width: 8px; height: 8px; border-radius: 99px; background: #111111; box-shadow: 0 0 0 2px #fff"></span><span style="width: 2px; height: 8px; background: #111111"></span><span style="background: #111111; color: #ffffff; font: 800 12px Figtree; padding: 5px 8px; border-radius: 8px; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,.25);">Marché · 3</span><span style="font: 700 11px Figtree; color: #62625d; white-space: nowrap; background: rgba(255,255,255,.85); padding: 0 3px; border-radius: 4px; margin: 5px 0">Fort-de-France</span></div><div style="position: absolute; left: 248.6px; top: 213.5px; transform: translate(-50%, calc(-100% + 4px)); display: flex; flex-direction: column; align-items: center"><span style="font: 700 11px Figtree; color: #62625d; white-space: nowrap; background: rgba(255,255,255,.85); padding: 0 3px; border-radius: 4px; margin: 5px 0">Le Robert</span><span style="background: #ffd23f; color: #111111; font: 800 12px Figtree; padding: 5px 8px; border-radius: 8px; white-space: nowrap; box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px #111111;">2 étals</span><span style="width: 2px; height: 8px; background: #ffd23f"></span><span style="width: 8px; height: 8px; border-radius: 99px; background: #ffd23f; box-shadow: 0 0 0 2px #fff"></span></div><div style="position: absolute; left: 276.2px; top: 261.3px; transform: translate(-50%, -4px); display: flex; flex-direction: column; align-items: center"><span style="width: 8px; height: 8px; border-radius: 99px; background: #ffd23f; box-shadow: 0 0 0 2px #fff"></span><span style="width: 2px; height: 8px; background: #ffd23f"></span><span style="background: #ffd23f; color: #111111; font: 800 12px Figtree; padding: 5px 8px; border-radius: 8px; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,.25);">1 étal</span><span style="font: 700 11px Figtree; color: #62625d; white-space: nowrap; background: rgba(255,255,255,.85); padding: 0 3px; border-radius: 4px; margin: 5px 0">Le François</span></div><div style="position: absolute; left: 259.8px; top: 375.2px; transform: translate(-50%, calc(-100% + 4px)); display: flex; flex-direction: column; align-items: center"><span style="font: 700 11px Figtree; color: #62625d; white-space: nowrap; background: rgba(255,255,255,.85); padding: 0 3px; border-radius: 4px; margin: 5px 0">Sainte-Luce</span><span style="background: #111111; color: #ffffff; font: 800 12px Figtree; padding: 5px 8px; border-radius: 8px; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,.25);">1 étal</span><span style="width: 2px; height: 8px; background: #111111"></span><span style="width: 8px; height: 8px; border-radius: 99px; background: #111111; box-shadow: 0 0 0 2px #fff"></span></div><div style="position: absolute; left: 302.2px; top: 373.7px; transform: translate(-50%, -4px); display: flex; flex-direction: column; align-items: center"><span style="width: 8px; height: 8px; border-radius: 99px; background: #111111; box-shadow: 0 0 0 2px #fff"></span><span style="width: 2px; height: 8px; background: #111111"></span><span style="background: #111111; color: #ffffff; font: 800 12px Figtree; padding: 5px 8px; border-radius: 8px; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,.25);">2 étals</span><span style="font: 700 11px Figtree; color: #62625d; white-space: nowrap; background: rgba(255,255,255,.85); padding: 0 3px; border-radius: 4px; margin: 5px 0">Le Marin</span></div>
+    <div style="position: absolute; right: 12px; top: 12px; display: flex; flex-direction: column; gap: 6px; font: 700 11px Figtree">
+      <span style="background: #ffffff; border-radius: 8px; padding: 6px 8px; display: flex; gap: 6px; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,.15)"><i style="width: 10px; height: 10px; border-radius: 3px; background: #ffd23f"></i>Arrivé il y a &lt; 1 h</span>
+      <span style="background: #ffffff; border-radius: 8px; padding: 6px 8px; display: flex; gap: 6px; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,.15)"><i style="width: 10px; height: 10px; border-radius: 3px; background: #111111"></i>Plus tôt ce matin</span>
+    </div>
+    <button aria-label="Me localiser" style="position: absolute; right: 12px; bottom: 196px; width: 44px; height: 44px; border-radius: 999px; border: 0; background: #ffffff; box-shadow: 0 1px 4px rgba(0,0,0,.2); display: flex; align-items: center; justify-content: center">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+
+    <div style="position: absolute; left: 0; right: 0; bottom: 0; background: #ffffff; border-radius: 18px 18px 0 0; box-shadow: 0 -2px 12px rgba(0,0,0,.12); padding: 8px 16px 14px">
+      <div style="width: 40px; height: 4px; border-radius: 4px; background: #e5e5e2; margin: 0 auto 10px"></div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px"><strong style="font-size: 17px">Le Robert · 2 étals</strong><span style="font: 700 13px Figtree; color: #62625d">4 km</span></div>
+      <div style="display: flex; gap: 10px; overflow: hidden">
+        <div style="width: 250px; flex-shrink: 0; border: 1px solid #e5e5e2; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px">
+          <div style="display: flex; justify-content: space-between; align-items: center"><strong style="font-size: 15px">Étal de Jean-Marc</strong><span style="font: 700 12px Figtree; background: #f3f3f1; border-radius: 999px; padding: 3px 7px">4,8 ★</span></div>
+          <span style="font-size: 13px; color: #62625d">Thon jaune, dorade, balaou</span>
+          <div style="display: flex; justify-content: space-between; align-items: center"><span style="background: #ffd23f; font: 800 13px Figtree; border-radius: 6px; padding: 2px 6px">dès 10,00 €/kg</span><span style="font: 700 12px Figtree; background: #111111; color: #ffffff; border-radius: 999px; padding: 4px 8px">Débarqué 7 h 10</span></div>
+        </div>
+        <div style="width: 250px; flex-shrink: 0; border: 1px solid #e5e5e2; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px">
+          <strong style="font-size: 15px">Étal de Rodrigue</strong>
+          <span style="font-size: 13px; color: #62625d">Coulirou, colas</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <nav style="display: flex; border-top: 1px solid #e5e5e2; background: #ffffff; padding: 6px 0 10px">
+    <a href="#" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; font: 600 12px Figtree, sans-serif; color: #62625d; text-decoration: none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#62625d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9H3z"></path></svg>Accueil</a>
+    <a href="#" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; font: 700 12px Figtree, sans-serif; color: #111111; text-decoration: none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"></path><circle cx="12" cy="9" r="2.5"></circle></svg>Carte</a>
+    <a href="#" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; font: 600 12px Figtree, sans-serif; color: #62625d; text-decoration: none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#62625d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16l-4-2-4 2-4-2-4 2z"></path><path d="M8 9h8M8 13h5"></path></svg>Mes bons</a>
+    <a href="#" style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; font: 600 12px Figtree, sans-serif; color: #62625d; text-decoration: none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#62625d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"></path></svg>Messages</a>
+  </nav>
+</div>
+</body>
+</html>
