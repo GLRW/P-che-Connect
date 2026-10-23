@@ -72,7 +72,7 @@ Le porteur du projet n'est pas développeur : explique les choix simplement, en 
   - Construire la version web : `cd app && npm install && EXPO_OFFLINE=1 npx expo export --platform web` (le service de versions d'Expo est bloqué dans l'environnement cloud : les versions sont fixées à la main pour le SDK 52, `query-string` ajouté explicitement pour expo-router).
 - `demo/` : démo HTML fonctionnelle (`demo/app-demo/index.html`, en ligne sur claude.ai) et prototype cliquable.
 - `design/` : maquettes, logos, charte, captures (sans photos).
-- `docs/` : site GitHub Pages (https://glrw.github.io/p-che-connect/). `docs/index.html` = la démo HTML ; `docs/app/` = **la vraie appli** (export web d'Expo, `baseUrl` `/p-che-connect/app` dans app.json) ; `docs/404.html` = copie de `docs/app/index.html` pour que les liens profonds de l'appli fonctionnent ; `.nojekyll` obligatoire (dossier `_expo`). Après chaque modif de l'appli : `cd app && npx tsc --noEmit && EXPO_OFFLINE=1 npx expo export --platform web`, puis recopier `app/dist` vers `docs/app` et `docs/404.html`.
+- `docs/` : site GitHub Pages (https://glrw.github.io/P-che-Connect/). `docs/index.html` = la démo HTML ; `docs/app/` = **la vraie appli** (export web d'Expo, `baseUrl` `/P-che-Connect/app` (attention : adresse sensible aux majuscules) dans app.json) ; `docs/404.html` = copie de `docs/app/index.html` pour que les liens profonds de l'appli fonctionnent ; `.nojekyll` obligatoire (dossier `_expo`). Après chaque modif de l'appli : `cd app && npx tsc --noEmit && EXPO_OFFLINE=1 npx expo export --platform web`, puis recopier `app/dist` vers `docs/app` et `docs/404.html`.
 
 ## État de l'appli (`app/`)
 

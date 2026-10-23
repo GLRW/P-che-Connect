@@ -24,7 +24,7 @@
     ],
     "experiments": {
       "typedRoutes": false,
-      "baseUrl": "/p-che-connect/app"
+      "baseUrl": "/P-che-Connect/app"
     }
   }
 }
