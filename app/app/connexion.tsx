@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bouton, Logo, T } from '../src/components/ui';
 import { CODE_SMS_DEMO, MODE_DEMO, useApp } from '../src/store';
@@ -29,14 +29,16 @@ export default function Connexion() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.fond }}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, padding: 24, gap: 22 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 20 }}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={{ padding: 24, gap: 22 }} keyboardShouldPersistTaps="handled">
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 8 }}>
           <Logo taille={44} />
           <T tresGras style={{ fontSize: 17, lineHeight: 23 }}>Réservez.{'\n'}Payez.{'\n'}Récupérez.</T>
         </View>
 
         {etape === 'numero' ? (
           <>
+            <Image source={require('../assets/ambiance/yoles.jpg')} style={st.ambiance} resizeMode="cover" accessibilityLabel="Yoles de pêcheurs sur la plage" />
             <View style={{ gap: 6 }}>
               <T tresGras style={{ fontSize: 24 }}>Bienvenue</T>
               <T gris>Le poisson du jour des pêcheurs de Martinique, réservé en quelques secondes.</T>
@@ -73,12 +75,14 @@ export default function Connexion() {
             <Pressable onPress={() => { setEtape('numero'); setCode(''); setErreur(''); }}><T gras style={{ textAlign: 'center', textDecorationLine: 'underline' }}>Changer de numéro</T></Pressable>
           </>
         )}
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const st = StyleSheet.create({
+  ambiance: { width: '100%', height: 170, borderRadius: 16 },
   bascule: { flexDirection: 'row', backgroundColor: c.doux, borderRadius: 999, padding: 4, gap: 4 },
   choix: { flex: 1, alignItems: 'center', paddingVertical: 12, borderRadius: 999 },
   champ: { height: 52, borderRadius: 12, backgroundColor: c.doux, paddingHorizontal: 16, fontSize: 17, fontFamily: f.gras, color: c.texte },

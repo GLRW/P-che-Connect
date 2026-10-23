@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CarteEtal } from '../../src/components/CarteEtal';
 import { IcCompte, IcLoupe } from '../../src/components/icones';
@@ -46,6 +46,14 @@ export default function Accueil() {
         {FILTRES.map((x) => <Chip key={x} titre={x} actif={filtre === x} onPress={() => setFiltre(x)} />)}
       </ScrollView>
       <ScrollView contentContainerStyle={{ paddingBottom: 24, gap: 20 }}>
+        {filtre === 'Tout' && !q ? (
+          <View style={st.bandeau}>
+            <Image source={require('../../assets/ambiance/thon.jpg')} style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' }} resizeMode="cover" accessibilityLabel="Pêcheur découpant un thon au marché" />
+            <View style={st.voile} />
+            <T tresGras style={{ color: '#fff', fontSize: 22, lineHeight: 26 }}>Le poisson du jour,{'\n'}en direct des pêcheurs</T>
+            <T gras style={{ color: '#fff', opacity: 0.9 }}>{liste.length} étals ouverts ce matin</T>
+          </View>
+        ) : null}
         {!liste.length ? (
           <Vide titre="Aucun étal ne correspond" texte="Essayez un autre poisson ou effacez la recherche." action="Tout afficher" onAction={() => { setFiltre('Tout'); setQ(''); }} />
         ) : (
@@ -77,6 +85,8 @@ export default function Accueil() {
 }
 
 const st = StyleSheet.create({
+  bandeau: { marginHorizontal: 16, height: 170, borderRadius: 16, overflow: 'hidden', justifyContent: 'flex-end', padding: 16, gap: 4 },
+  voile: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(18,53,91,0.45)' },
   recherche: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: c.doux, borderRadius: 999, paddingHorizontal: 16, height: 46 },
   champ: { flex: 1, fontSize: 16, fontFamily: f.normal, color: c.texte, height: 46 },
   h2: { fontSize: 19, paddingHorizontal: 16 },
