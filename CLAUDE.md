@@ -23,7 +23,7 @@ Le porteur du projet n'est pas développeur : explique les choix simplement, en 
 - Inspiration : **Uber Eats** (pratique avant tout). Chaque pêcheur = un « étal » présenté comme un restaurant : photo d'ambiance, note, distance, espèces, heure de débarquement.
 - Parcours client : Accueil (commune, recherche, filtres espèces, « Arrivé il y a moins d'une heure ») → Étal (poissons avec + / −, prix au kilo, dispo) → Panier (préparation : entier / tranches / filets, créneau de retrait, paiement) → Bon de retrait (code + QR, adresse exacte débloquée, messagerie).
 - Parcours pêcheur : publier en moins d'une minute sur téléphone (photo, dictée vocale, + / − sur les kilos, prix de la veille pré-remplis), voir les réservations, valider la pesée, clôturer la vente.
-- **Photos** : ports, marchés, yoles, débarcadères **et aussi les arrivages de poisson** (le porteur a envoyé des photos d'étals de poisson : la règle « pas de poisson » est levée). **Retirées de la démo le 23/10/2026 (le porteur n'aime pas le rendu)** : les étals affichent des cadres neutres ; les fichiers restent dans `design/photos/`. Photos libres de droits (Unsplash, Pexels, Wikimedia Commons avec crédit) ou prises sur place. Rangées dans `design/photos/`, provenance notée dans `design/photos/sources.txt` — à vérifier avant toute publication (droits, personnes reconnaissables, plaques d'immatriculation). Photos en place : Grand-Rivière, Saint-Pierre, Belle-Fontaine, Case-Pilote, Le Diamant, Le Marin.
+- **Photos** : ports, marchés, yoles, débarcadères **et aussi les arrivages de poisson** (le porteur a envoyé des photos d'étals de poisson : la règle « pas de poisson » est levée). **Retirées de la démo le 23/10/2026 (le porteur n'aime pas le rendu)** : les étals affichent des cadres neutres ; les fichiers sont gardés hors du dépôt. Photos libres de droits (Unsplash, Pexels, Wikimedia Commons avec crédit) ou prises sur place. **Les photos ne sont plus dans ce dépôt** (droits non vérifiés) : elles sont dans la sauvegarde zip du porteur. Avant toute réutilisation : vérifier droits, personnes reconnaissables, plaques d'immatriculation.
 
 ## Identité visuelle (validée)
 
@@ -55,7 +55,6 @@ Le porteur du projet n'est pas développeur : explique les choix simplement, en 
 - `design/maquettes/` : les 5 écrans d'origine (ancien style bleu lagon), gardés pour mémoire. Les dossiers `maquettes-theme-a/`, `maquettes-etal-noir/`, `maquettes-mix/` sont des essais intermédiaires.
 - `design/prototype/prototype-v1.html` : premier prototype fonctionnel (ancien style, données d'exemple, numéro visible — à ne pas reprendre tel quel).
 - `design/charte/` : tokens et règles de rédaction de la première charte.
-- `design/photos/` : à remplir.
 
 ## Prochaines étapes proposées
 
@@ -72,4 +71,5 @@ Le porteur du projet n'est pas développeur : explique les choix simplement, en 
   - `app/supabase/` : schéma de base de données, règles de sécurité, fonctions serveur (Stripe Connect).
   - Construire la version web : `cd app && npm install && EXPO_OFFLINE=1 npx expo export --platform web` (le service de versions d'Expo est bloqué dans l'environnement cloud : les versions sont fixées à la main pour le SDK 52, `query-string` ajouté explicitement pour expo-router).
 - `demo/` : démo HTML fonctionnelle (`demo/app-demo/index.html`, en ligne sur claude.ai) et prototype cliquable.
-- `design/` : maquettes, logos, charte, photos (droits à vérifier), captures.
+- `design/` : maquettes, logos, charte, captures (sans photos).
+- `docs/` : la démo publiée en site web par GitHub Pages (copie de `demo/app-demo/index.html` dans une page HTML complète). À remettre à jour après chaque modification de la démo.
